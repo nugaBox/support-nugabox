@@ -1,11 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import cookieParser from 'cookie-parser';
+import * as cookieParserModule from 'cookie-parser';
 import { AppModule } from './app.module';
+
+const cookieParser =
+  (cookieParserModule as unknown as { default?: typeof cookieParserModule }).default ??
+  cookieParserModule;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const origin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:3000';
+  const origin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:6040';
   app.enableCors({
     origin,
     credentials: true,

@@ -19,7 +19,7 @@ Next.js(Nuxt 아님) + NestJS + PostgreSQL + Prisma + Docker Compose 기반 고�
    ./compose.sh dev migrate
    ./compose.sh dev seed
    ```
-3. 브라우저: `http://localhost:3000` (프론트), API: `http://localhost:4000`
+3. 브라우저: `http://localhost:6040` (프론트), API: `http://localhost:6041`, PostgreSQL(호스트): `localhost:6042`
 
 ## Docker 명령 (`compose.sh`)
 

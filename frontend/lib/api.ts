@@ -3,7 +3,7 @@ const ACCESS_KEY = 'nugabox_access_token';
 const REFRESH_KEY = 'nugabox_refresh_token';
 
 export function getApiBase(): string {
-  const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+  const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:6041';
   return base.replace(/\/$/, '');
 }
 
