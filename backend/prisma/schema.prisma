@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum PostCategory {
+  URGENT
+  FEATURE_ADD
+  FEATURE_INQUIRY
+  FEATURE_UPDATE
+}
+
+enum PostStatus {
+  WAITING
+  IN_PROGRESS
+  REJECTED
+  DONE
+  STOPPED
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password_hash String
+  name          String
+  role          Role      @default(MEMBER)
+  is_active     Boolean   @default(true)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  sites_mapped       UserSite[]
+  posts              SupportPost[]
+  comments           Comment[]
+  refresh_tokens     RefreshToken[]
+  status_histories   StatusHistory[]
+}
+
+model Site {
+  id          String    @id @default(uuid())
+  name        String
+  code        String    @unique
+  description String?
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  members UserSite[]
+  posts   SupportPost[]
+}
+
+model UserSite {
+  id         String   @id @default(uuid())
+  user_id    String
+  site_id    String
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  site Site @relation(fields: [site_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, site_id])
+  @@index([user_id])
+  @@index([site_id])
+}
+
+model SupportPost {
+  id             String       @id @default(uuid())
+  site_id        String
+  user_id        String
+  title          String
+  content        String       @db.Text
+  category       PostCategory
+  status         PostStatus   @default(WAITING)
+  progress_note  String?      @db.Text
+  is_private     Boolean      @default(true)
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+  deleted_at     DateTime?
+
+  site        Site            @relation(fields: [site_id], references: [id])
+  author      User            @relation(fields: [user_id], references: [id])
+  attachments Attachment[]
+  comments    Comment[]
+  history     StatusHistory[]
+
+  @@index([user_id])
+  @@index([site_id])
+  @@index([status])
+  @@index([created_at])
+}
+
+model Attachment {
+  id             String   @id @default(uuid())
+  post_id        String
+  original_name  String
+  stored_name    String
+  mime_type      String
+  size           Int
+  path           String
+  created_at     DateTime @default(now())
+  deleted_at     DateTime?
+
+  post SupportPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@index([post_id])
+}
+
+model Comment {
+  id         String    @id @default(uuid())
+  post_id    String
+  user_id    String
+  content    String    @db.Text
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  post SupportPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [user_id], references: [id])
+
+  @@index([post_id])
+}
+
+model StatusHistory {
+  id                  String     @id @default(uuid())
+  post_id             String
+  before_status       PostStatus
+  after_status        PostStatus
+  changed_by_user_id  String
+  created_at          DateTime   @default(now())
+
+  post      SupportPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  changedBy User        @relation(fields: [changed_by_user_id], references: [id])
+
+  @@index([post_id])
+}
+
+model RefreshToken {
+  id         String   @id @default(uuid())
+  user_id    String
+  token_hash String   @unique
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}

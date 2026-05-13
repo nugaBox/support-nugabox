@@ -1,0 +1,26 @@
+# 운영: 빌드 산출물 실행 (Dockerfile 기본은 prod용 멀티스테이지)
+services:
+  postgres:
+    ports: []
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: node dist/main.js
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    environment:
+      NODE_ENV: production
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    command: npm run start
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
