@@ -16,9 +16,9 @@ export function AppHeader() {
   const { user, logout, loading } = useAuth();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const isLogin = pathname === '/login';
+  const isGuestHome = pathname === '/' && (!user || loading);
 
-  if (isLogin) {
+  if (isGuestHome) {
     return (
       <header className="sticky top-0 z-40 border-b border-line bg-elevated/80 backdrop-blur-xl dark:bg-elevated/70">
         <div className="mx-auto flex max-w-5xl justify-center px-4 py-3.5 md:px-8">

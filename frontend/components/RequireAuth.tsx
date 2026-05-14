@@ -18,7 +18,7 @@ export function RequireAuth({
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      router.replace(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+      router.replace(`/?next=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
     if (adminOnly && user.role !== 'ADMIN') {
