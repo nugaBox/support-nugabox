@@ -2,31 +2,91 @@
 @tailwind components;
 @tailwind utilities;
 
+/* OpenAI 스타일: 모노톤 + 라이트 그레이 캔버스 */
 :root {
-  --surface: 250 250 250;
-  --surface-muted: 245 245 245;
-  --foreground: 23 23 23;
-  --border: 229 229 229;
+  --canvas: 247 247 248;
+  --canvas-subtle: 242 242 243;
+  --elevated: 255 255 255;
+  --elevated-hover: 252 252 252;
+  --border: 232 232 233;
+  --border-strong: 212 212 214;
+  --text: 13 13 13;
+  --text-secondary: 82 82 84;
+  --text-tertiary: 118 118 121;
+  --accent-soft: 239 239 241;
+  --accent-ring: 0 0 0;
+  --shadow-sm: 0 1px 2px rgba(15, 15, 20, 0.04);
+  --shadow-md: 0 4px 14px rgba(15, 15, 20, 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --surface: 10 10 10;
-    --surface-muted: 23 23 23;
-    --foreground: 237 237 237;
-    --border: 48 48 48;
+    --canvas: 33 33 34;
+    --canvas-subtle: 38 38 40;
+    --elevated: 46 46 48;
+    --elevated-hover: 52 52 54;
+    --border: 62 62 65;
+    --border-strong: 82 82 86;
+    --text: 237 237 238;
+    --text-secondary: 180 180 184;
+    --text-tertiary: 142 142 148;
+    --accent-soft: 54 54 57;
+    --accent-ring: 255 255 255;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
   }
 }
 
-body {
-  @apply bg-[rgb(var(--surface))] text-[rgb(var(--foreground))] antialiased;
-  font-family: var(--font-pretendard), system-ui, sans-serif;
+@layer base {
+  body {
+    @apply antialiased text-ink bg-canvas;
+    font-family: var(--font-pretendard), 'Pretendard', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.011em;
+  }
 }
 
+/* 레거시 호환 제거 — 컴포넌트는 canvas/elevated 토큰 사용 */
 .prose-support {
-  @apply max-w-none text-sm leading-relaxed;
+  @apply max-w-none text-sm leading-relaxed text-ink;
 }
 
 .prose-support a {
-  @apply underline underline-offset-2;
+  @apply text-ink-secondary underline underline-offset-2 hover:text-ink;
+}
+
+@layer components {
+  .ui-card {
+    @apply rounded-2xl border border-line bg-elevated shadow-card;
+  }
+
+  .ui-card-muted {
+    @apply rounded-2xl border border-line bg-canvas-subtle;
+  }
+
+  .ui-input {
+    @apply w-full rounded-xl border border-line bg-elevated px-3.5 py-2.5 text-sm text-ink shadow-sm outline-none transition-colors
+      placeholder:text-ink-tertiary
+      focus:border-line-strong focus:ring-2 focus:ring-ink/5;
+  }
+
+  .ui-btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white shadow-card transition-opacity
+      hover:opacity-90 active:opacity-95
+      dark:bg-zinc-100 dark:text-zinc-900
+      disabled:pointer-events-none disabled:opacity-40;
+  }
+
+  .ui-btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-line-strong bg-elevated px-5 py-2.5 text-sm font-medium text-ink shadow-sm transition-colors
+      hover:bg-elevated-hover;
+  }
+
+  .ui-btn-ghost {
+    @apply inline-flex items-center justify-center rounded-xl border border-line bg-transparent px-3 py-1.5 text-xs font-medium text-ink-secondary transition-colors
+      hover:bg-accent-soft hover:text-ink;
+  }
+
+  .ui-badge {
+    @apply inline-flex items-center rounded-lg border border-line bg-accent-soft px-2 py-0.5 text-[11px] font-medium text-ink-secondary;
+  }
 }

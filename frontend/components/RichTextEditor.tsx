@@ -23,7 +23,7 @@ export function RichTextEditor({ value, onChange, disabled }: Props) {
       LinkExtension.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-neutral-800 underline underline-offset-2 dark:text-neutral-200',
+          class: 'text-ink underline underline-offset-2 decoration-line',
         },
       }),
       Placeholder.configure({
@@ -37,7 +37,7 @@ export function RichTextEditor({ value, onChange, disabled }: Props) {
     editorProps: {
       attributes: {
         class:
-          'min-h-[220px] rounded-md border border-neutral-200 bg-transparent px-3 py-2 text-sm focus:outline-none dark:border-neutral-700 prose-support',
+          'min-h-[220px] rounded-xl border border-line bg-elevated px-3 py-2.5 text-sm text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-ink/5 prose-support',
       },
     },
   });
@@ -51,7 +51,7 @@ export function RichTextEditor({ value, onChange, disabled }: Props) {
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-1 border-b border-neutral-200 pb-2 dark:border-neutral-800">
+      <div className="flex flex-wrap gap-1 border-b border-line pb-2">
         <ToolbarBtn
           label="굵게"
           active={editor.isActive('bold')}
@@ -105,10 +105,10 @@ function ToolbarBtn({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded border px-2 py-0.5 text-xs transition-colors ${
+      className={`rounded-lg border px-2 py-1 text-xs font-medium transition-colors ${
         active
-          ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-black'
-          : 'border-neutral-300 dark:border-neutral-600'
+          ? 'border-line-strong bg-ink text-white dark:bg-zinc-100 dark:text-zinc-900'
+          : 'border-line bg-elevated text-ink-secondary hover:bg-accent-soft hover:text-ink'
       }`}
     >
       {label}

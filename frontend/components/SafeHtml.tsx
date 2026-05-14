@@ -8,7 +8,7 @@ export function SafeHtml({ html }: { html: string }) {
   });
   return (
     <div
-      className="prose-support prose-support border-t border-neutral-200 pt-4 dark:border-neutral-800"
+      className="prose-support border-t border-line pt-4 text-ink"
       dangerouslySetInnerHTML={{ __html: clean }}
     />
   );

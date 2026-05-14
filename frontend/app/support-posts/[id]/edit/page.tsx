@@ -82,29 +82,33 @@ function Inner() {
   }
 
   if (error && !post) {
-    return <p className="text-center text-red-600">{error}</p>;
+    return (
+      <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-8 text-center text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
+        {error}
+      </p>
+    );
   }
   if (!post) {
-    return <p className="text-center text-neutral-500">로딩 중…</p>;
+    return (
+      <p className="rounded-xl border border-line bg-canvas-subtle px-4 py-12 text-center text-sm text-ink-tertiary">
+        로딩 중…
+      </p>
+    );
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 py-4">
+    <div className="mx-auto max-w-3xl space-y-8">
       <div className="flex justify-between gap-4">
-        <h1 className="text-2xl font-semibold">문의 수정</h1>
-        <Link href={`/support-posts/${id}`} className="text-xs text-neutral-500">
-          상세로
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">문의 수정</h1>
+        <Link href={`/support-posts/${id}`} className="text-xs font-medium text-ink-tertiary hover:text-ink">
+          ← 상세
         </Link>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-6">
-        <label className="block space-y-1">
-          <span className="text-sm">분류</span>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm dark:border-neutral-600"
-          >
+      <form onSubmit={onSubmit} className="ui-card space-y-8 p-6 md:p-8">
+        <label className="block space-y-2">
+          <span className="text-sm font-medium text-ink-secondary">분류</span>
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="ui-input">
             {Object.entries(CATEGORY_LABEL).map(([k, v]) => (
               <option key={k} value={k}>
                 {v}
@@ -113,29 +117,25 @@ function Inner() {
           </select>
         </label>
 
-        <label className="block space-y-1">
-          <span className="text-sm">제목</span>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm dark:border-neutral-600"
-          />
+        <label className="block space-y-2">
+          <span className="text-sm font-medium text-ink-secondary">제목</span>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} className="ui-input" />
         </label>
 
-        <div className="space-y-1">
-          <span className="text-sm">본문</span>
+        <div className="space-y-2">
+          <span className="text-sm font-medium text-ink-secondary">본문</span>
           <RichTextEditor key={post.id} value={content} onChange={setContent} />
         </div>
 
-        <section className="space-y-2">
-          <h2 className="text-sm font-medium">기존 첨부 ({post.attachments.length}/5)</h2>
-          <ul className="space-y-1 text-sm">
+        <section className="space-y-3 rounded-xl border border-line bg-canvas-subtle p-4">
+          <h2 className="text-sm font-medium text-ink">기존 첨부 ({post.attachments.length}/5)</h2>
+          <ul className="space-y-2 text-sm text-ink">
             {post.attachments.map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-2">
                 <span>{a.originalName}</span>
                 <button
                   type="button"
-                  className="text-xs underline"
+                  className="text-xs font-medium text-ink-tertiary underline hover:text-red-600"
                   onClick={() => void removeAttachment(a.id)}
                 >
                   삭제
@@ -145,8 +145,8 @@ function Inner() {
           </ul>
         </section>
 
-        <label className="block space-y-1">
-          <span className="text-sm">
+        <label className="block space-y-2">
+          <span className="text-sm font-medium text-ink-secondary">
             새 첨부 추가 (합계 최대 5개 — 현재 {post.attachments.length}개)
           </span>
           <input
@@ -155,17 +155,17 @@ function Inner() {
             onChange={(e) =>
               setFiles(Array.from(e.target.files ?? []).slice(0, 5 - post.attachments.length))
             }
-            className="text-sm"
+            className="text-sm text-ink-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-accent-soft file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
           />
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300">
+            {error}
+          </p>
+        )}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md border border-neutral-900 px-6 py-2 text-sm dark:border-white disabled:opacity-50"
-        >
+        <button type="submit" disabled={pending} className="ui-btn-primary">
           {pending ? '저장 중…' : '저장'}
         </button>
       </form>

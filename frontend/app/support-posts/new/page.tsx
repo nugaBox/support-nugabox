@@ -72,20 +72,23 @@ function Inner() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 py-4">
+    <div className="mx-auto max-w-3xl space-y-8">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">문의 등록</h1>
-        <Link href="/support-posts" className="text-xs text-neutral-500 hover:underline">
-          목록
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">문의 등록</h1>
+        <Link href="/support-posts" className="text-xs font-medium text-ink-tertiary hover:text-ink">
+          ← 목록
         </Link>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="ui-card space-y-8 p-6 md:p-8">
         <fieldset className="space-y-3">
-          <legend className="text-sm font-medium">사이트</legend>
+          <legend className="text-sm font-medium text-ink">사이트</legend>
           <div className="flex flex-col gap-2">
             {sites.map((s) => (
-              <label key={s.id} className="flex cursor-pointer items-center gap-2 text-sm">
+              <label
+                key={s.id}
+                className="flex cursor-pointer items-center gap-3 rounded-xl border border-line bg-canvas-subtle px-3 py-2.5 text-sm transition-colors hover:border-line-strong"
+              >
                 <input
                   type="radio"
                   name="site"
@@ -93,22 +96,18 @@ function Inner() {
                   checked={siteId === s.id}
                   onChange={() => setSiteId(s.id)}
                 />
-                <span>
+                <span className="text-ink">
                   {s.name}{' '}
-                  <span className="text-neutral-500">({s.code})</span>
+                  <span className="text-ink-tertiary">({s.code})</span>
                 </span>
               </label>
             ))}
           </div>
         </fieldset>
 
-        <label className="block space-y-1">
-          <span className="text-sm">분류</span>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm dark:border-neutral-600"
-          >
+        <label className="block space-y-2">
+          <span className="text-sm font-medium text-ink-secondary">분류</span>
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="ui-input">
             {Object.entries(CATEGORY_LABEL).map(([k, v]) => (
               <option key={k} value={k}>
                 {v}
@@ -117,38 +116,38 @@ function Inner() {
           </select>
         </label>
 
-        <label className="block space-y-1">
-          <span className="text-sm">제목</span>
+        <label className="block space-y-2">
+          <span className="text-sm font-medium text-ink-secondary">제목</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm dark:border-neutral-600"
+            className="ui-input"
             maxLength={300}
           />
         </label>
 
-        <div className="space-y-1">
-          <span className="text-sm">본문</span>
+        <div className="space-y-2">
+          <span className="text-sm font-medium text-ink-secondary">본문</span>
           <RichTextEditor value={content} onChange={setContent} />
         </div>
 
-        <label className="block space-y-1">
-          <span className="text-sm">첨부파일 (최대 5개)</span>
+        <label className="block space-y-2">
+          <span className="text-sm font-medium text-ink-secondary">첨부파일 (최대 5개)</span>
           <input
             type="file"
             multiple
             onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))}
-            className="text-sm"
+            className="text-sm text-ink-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-accent-soft file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
           />
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300">
+            {error}
+          </p>
+        )}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md border border-neutral-900 px-6 py-2 text-sm dark:border-white disabled:opacity-50"
-        >
+        <button type="submit" disabled={pending} className="ui-btn-primary">
           {pending ? '등록 중…' : '등록'}
         </button>
       </form>

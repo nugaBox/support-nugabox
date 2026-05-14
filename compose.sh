@@ -20,6 +20,12 @@ _prod_compose() {
   docker compose -f docker-compose.yml -f docker-compose.prod.yml "$@"
 }
 
+# ./compose.sh --dev up 형태 호환
+case "${1:-}" in
+  --dev) set -- dev "${@:2}" ;;
+  --prod) set -- prod "${@:2}" ;;
+esac
+
 cmd="${1:-}"
 sub="${2:-}"
 
@@ -76,7 +82,7 @@ case "$cmd" in
   *)
     echo "NUGABOX Support — Docker Compose 래퍼"
     echo ""
-    echo "개발:"
+    echo "개발 (동일: $0 --dev …):"
     echo "  $0 dev up          # 빌드 후 백그라운드 기동 (hot reload)"
     echo "  $0 dev down"
     echo "  $0 dev logs"

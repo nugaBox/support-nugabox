@@ -140,18 +140,29 @@ function Inner() {
     URL.revokeObjectURL(url);
   }
 
-  if (error || !post) {
-    return <p className="py-12 text-center text-sm text-red-600">{error ?? '로딩 중…'}</p>;
+  if (error) {
+    return (
+      <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-8 text-center text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
+        {error}
+      </p>
+    );
+  }
+  if (!post) {
+    return (
+      <p className="rounded-xl border border-line bg-canvas-subtle px-4 py-12 text-center text-sm text-ink-tertiary">
+        로딩 중…
+      </p>
+    );
   }
 
   return (
-    <article className="mx-auto max-w-3xl space-y-10 py-4">
+    <article className="mx-auto max-w-3xl space-y-10">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-widest text-neutral-500">
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
             {post.site.name}
           </p>
-          <h1 className="mt-2 text-2xl font-semibold">{post.title}</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-ink">{post.title}</h1>
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
             <Badge>{CATEGORY_LABEL[post.category] ?? post.category}</Badge>
             <Badge>{STATUS_LABEL[post.status] ?? post.status}</Badge>
@@ -159,10 +170,7 @@ function Inner() {
         </div>
         {canManage && (
           <div className="flex gap-2">
-            <Link
-              href={`/support-posts/${id}/edit`}
-              className="rounded border border-neutral-400 px-3 py-1 text-xs dark:border-neutral-600"
-            >
+            <Link href={`/support-posts/${id}/edit`} className="ui-btn-secondary py-2 text-xs">
               수정
             </Link>
             <button
@@ -176,29 +184,29 @@ function Inner() {
         )}
       </div>
 
-      <dl className="grid gap-2 border-y border-neutral-200 py-4 text-sm dark:border-neutral-800 md:grid-cols-2">
+      <dl className="ui-card-muted grid gap-3 border-0 p-5 text-sm md:grid-cols-2">
         <div>
-          <dt className="text-neutral-500">작성자</dt>
-          <dd>{post.author.name}</dd>
+          <dt className="text-xs font-medium text-ink-tertiary">작성자</dt>
+          <dd className="mt-1 text-ink">{post.author.name}</dd>
         </div>
         <div>
-          <dt className="text-neutral-500">작성일</dt>
-          <dd>{new Date(post.createdAt).toLocaleString('ko-KR')}</dd>
+          <dt className="text-xs font-medium text-ink-tertiary">작성일</dt>
+          <dd className="mt-1 text-ink">{new Date(post.createdAt).toLocaleString('ko-KR')}</dd>
         </div>
         <div>
-          <dt className="text-neutral-500">수정일</dt>
-          <dd>{new Date(post.updatedAt).toLocaleString('ko-KR')}</dd>
+          <dt className="text-xs font-medium text-ink-tertiary">수정일</dt>
+          <dd className="mt-1 text-ink">{new Date(post.updatedAt).toLocaleString('ko-KR')}</dd>
         </div>
       </dl>
 
       {user?.role === 'ADMIN' && (
-        <section className="space-y-3 rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
-          <h2 className="text-sm font-medium">상태 (관리자)</h2>
+        <section className="ui-card space-y-4 p-5">
+          <h2 className="text-sm font-medium text-ink">상태 (관리자)</h2>
           <select
             value={post.status}
             disabled={pending}
             onChange={(e) => void changeStatus(e.target.value)}
-            className="w-full max-w-xs rounded border border-neutral-300 bg-transparent px-2 py-1 text-sm dark:border-neutral-600"
+            className="ui-input max-w-xs py-2"
           >
             {Object.entries(STATUS_LABEL).map(([k, v]) => (
               <option key={k} value={k}>
@@ -207,66 +215,64 @@ function Inner() {
             ))}
           </select>
 
-          <h2 className="pt-4 text-sm font-medium">진행내용 (관리자)</h2>
+          <h2 className="pt-2 text-sm font-medium text-ink">진행내용 (관리자)</h2>
           <textarea
             value={progressDraft}
             onChange={(e) => setProgressDraft(e.target.value)}
             rows={5}
-            className="w-full rounded border border-neutral-300 bg-transparent px-3 py-2 text-sm dark:border-neutral-600"
+            className="ui-input"
           />
           <button
             type="button"
             disabled={pending}
             onClick={() => void saveProgress()}
-            className="rounded border px-3 py-1 text-xs"
+            className="ui-btn-secondary py-2 text-xs"
           >
             진행내용 저장
           </button>
         </section>
       )}
 
-      <section>
-        <h2 className="mb-2 text-sm font-medium text-neutral-600 dark:text-neutral-400">본문</h2>
+      <section className="ui-card p-6">
+        <h2 className="mb-3 text-sm font-medium text-ink-secondary">본문</h2>
         <SafeHtml html={post.content} />
       </section>
 
-      <section>
-        <h2 className="mb-2 text-sm font-medium text-neutral-600 dark:text-neutral-400">
-          진행내용
-        </h2>
+      <section className="ui-card p-6">
+        <h2 className="mb-3 text-sm font-medium text-ink-secondary">진행내용</h2>
         {post.progressNote ? (
           <SafeHtml html={post.progressNote} />
         ) : (
-          <p className="text-sm text-neutral-500">등록된 진행내용이 없습니다.</p>
+          <p className="text-sm text-ink-tertiary">등록된 진행내용이 없습니다.</p>
         )}
       </section>
 
-      <section className="space-y-2">
-        <h2 className="text-sm font-medium">첨부파일</h2>
+      <section className="ui-card space-y-3 p-6">
+        <h2 className="text-sm font-medium text-ink">첨부파일</h2>
         <ul className="space-y-2 text-sm">
           {post.attachments.map((a) => (
             <li key={a.id}>
               <button
                 type="button"
-                className="underline underline-offset-2"
+                className="text-ink-secondary underline decoration-line underline-offset-2 hover:text-ink"
                 onClick={() => void handleDownload(a.id, a.originalName)}
               >
                 {a.originalName}
               </button>
-              <span className="ml-2 text-xs text-neutral-500">
+              <span className="ml-2 text-xs text-ink-tertiary">
                 {(a.size / 1024).toFixed(1)} KB
               </span>
             </li>
           ))}
           {post.attachments.length === 0 && (
-            <li className="text-neutral-500">첨부파일이 없습니다.</li>
+            <li className="text-ink-tertiary">첨부파일이 없습니다.</li>
           )}
         </ul>
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-medium">상태 변경 이력</h2>
-        <ul className="space-y-2 text-xs text-neutral-600 dark:text-neutral-400">
+        <h2 className="mb-3 text-sm font-medium text-ink">상태 변경 이력</h2>
+        <ul className="space-y-2 text-xs text-ink-secondary">
           {post.statusHistory.map((h) => (
             <li key={h.id}>
               {STATUS_LABEL[h.beforeStatus]} → {STATUS_LABEL[h.afterStatus]} ·{' '}
@@ -277,18 +283,18 @@ function Inner() {
         </ul>
       </section>
 
-      <section className="space-y-4 border-t border-neutral-200 pt-6 dark:border-neutral-800">
-        <h2 className="text-sm font-medium">댓글</h2>
+      <section className="space-y-4 border-t border-line pt-8">
+        <h2 className="text-sm font-medium text-ink">댓글</h2>
         <ul className="space-y-4">
           {post.comments.map((c) => (
-            <li key={c.id} className="rounded border border-neutral-200 p-3 text-sm dark:border-neutral-800">
-              <div className="flex justify-between text-xs text-neutral-500">
+            <li key={c.id} className="rounded-xl border border-line bg-canvas-subtle p-4 text-sm">
+              <div className="flex justify-between text-xs text-ink-tertiary">
                 <span>
                   {c.user.name} · {c.user.role === 'ADMIN' ? '관리자' : '회원'}
                 </span>
                 <span>{new Date(c.createdAt).toLocaleString('ko-KR')}</span>
               </div>
-              <p className="mt-2 whitespace-pre-wrap">{c.content}</p>
+              <p className="mt-2 whitespace-pre-wrap text-ink">{c.content}</p>
               {(user?.role === 'ADMIN' || user?.id === c.user.id) && (
                 <div className="mt-2 flex gap-2 text-xs">
                   <button
@@ -323,19 +329,15 @@ function Inner() {
           ))}
         </ul>
 
-        <form onSubmit={onCommentSubmit} className="space-y-2">
+        <form onSubmit={onCommentSubmit} className="space-y-3 pt-2">
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={3}
             placeholder="댓글 작성"
-            className="w-full rounded border border-neutral-300 bg-transparent px-3 py-2 text-sm dark:border-neutral-600"
+            className="ui-input"
           />
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded border px-3 py-1 text-xs disabled:opacity-50"
-          >
+          <button type="submit" disabled={pending} className="ui-btn-primary py-2 text-xs disabled:opacity-50">
             댓글 등록
           </button>
         </form>
@@ -345,9 +347,5 @@ function Inner() {
 }
 
 function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-block rounded border border-neutral-300 px-2 py-0.5 dark:border-neutral-600">
-      {children}
-    </span>
-  );
+  return <span className="ui-badge">{children}</span>;
 }

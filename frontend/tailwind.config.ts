@@ -8,13 +8,29 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-pretendard)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-pretendard)', 'Pretendard', 'system-ui', 'sans-serif'],
       },
       colors: {
-        surface: {
-          DEFAULT: 'rgb(var(--surface) / <alpha-value>)',
-          muted: 'rgb(var(--surface-muted) / <alpha-value>)',
+        canvas: 'rgb(var(--canvas) / <alpha-value>)',
+        'canvas-subtle': 'rgb(var(--canvas-subtle) / <alpha-value>)',
+        elevated: 'rgb(var(--elevated) / <alpha-value>)',
+        'elevated-hover': 'rgb(var(--elevated-hover) / <alpha-value>)',
+        line: 'rgb(var(--border) / <alpha-value>)',
+        'line-strong': 'rgb(var(--border-strong) / <alpha-value>)',
+        ink: {
+          DEFAULT: 'rgb(var(--text) / <alpha-value>)',
+          secondary: 'rgb(var(--text-secondary) / <alpha-value>)',
+          tertiary: 'rgb(var(--text-tertiary) / <alpha-value>)',
         },
+        'accent-soft': 'rgb(var(--accent-soft) / <alpha-value>)',
+      },
+      boxShadow: {
+        card: 'var(--shadow-sm)',
+        float: 'var(--shadow-md)',
+      },
+      borderRadius: {
+        '2xl': '1rem',
+        '3xl': '1.25rem',
       },
     },
   },

@@ -40,15 +40,11 @@ export default function SettingsUserSitesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-medium">회원 선택 후 사이트 매핑</h2>
-      <label className="block max-w-md text-sm">
+    <div className="ui-card space-y-6 p-6">
+      <h2 className="text-lg font-semibold tracking-tight text-ink">회원 선택 후 사이트 매핑</h2>
+      <label className="block max-w-md space-y-2 text-sm font-medium text-ink-secondary">
         회원
-        <select
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          className="mt-1 w-full rounded border border-neutral-300 px-3 py-2 dark:border-neutral-600"
-        >
+        <select value={userId} onChange={(e) => setUserId(e.target.value)} className="ui-input mt-0">
           <option value="">선택…</option>
           {users.map((u) => (
             <option key={u.id} value={u.id}>
@@ -58,22 +54,26 @@ export default function SettingsUserSitesPage() {
         </select>
       </label>
 
-      <form onSubmit={onSave} className="space-y-3">
-        <div className="grid gap-2">
+      <form onSubmit={onSave} className="space-y-4">
+        <div className="grid gap-2 rounded-xl border border-line bg-canvas-subtle p-4">
           {sites.map((s) => (
-            <label key={s.id} className="flex items-center gap-2 text-sm">
+            <label key={s.id} className="flex cursor-pointer items-center gap-3 text-sm text-ink">
               <input
                 type="checkbox"
+                className="size-4 rounded border-line text-ink accent-zinc-900 dark:accent-zinc-100"
                 checked={!!selected[s.id]}
                 onChange={(e) =>
                   setSelected((prev) => ({ ...prev, [s.id]: e.target.checked }))
                 }
               />
-              {s.name} ({s.code})
+              <span>
+                {s.name}{' '}
+                <span className="font-mono text-xs text-ink-secondary">({s.code})</span>
+              </span>
             </label>
           ))}
         </div>
-        <button type="submit" className="rounded border px-4 py-2 text-sm" disabled={!userId}>
+        <button type="submit" className="ui-btn-primary" disabled={!userId}>
           저장
         </button>
       </form>

@@ -1,7 +1,9 @@
 FROM node:20-alpine
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm install && npx prisma generate
+RUN npm install
+# 스키마 복사 후 generate (이전 단계에서는 prisma/schema.prisma 없음)
 COPY . .
+RUN npx prisma generate
 EXPOSE 4000
 CMD ["sh", "-c", "npx prisma generate && npm run start:dev"]

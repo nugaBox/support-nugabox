@@ -1,27 +1,48 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { RequireAuth } from '@/components/RequireAuth';
+
+const navPill =
+  'rounded-full px-4 py-2 text-sm font-medium text-ink-secondary transition-colors hover:bg-elevated hover:text-ink';
+const navPillActive = 'bg-elevated text-ink shadow-sm';
 
 export default function SettingsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
   return (
     <RequireAuth adminOnly>
-      <div className="mx-auto max-w-5xl space-y-8 py-4">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <h1 className="text-2xl font-semibold">설정</h1>
-          <nav className="flex flex-wrap gap-3 text-sm">
-            <Link href="/settings/sites" className="underline underline-offset-4">
+      <div className="mx-auto max-w-5xl space-y-10">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+              Admin
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">설정</h1>
+          </div>
+          <nav className="flex flex-wrap gap-1 rounded-2xl border border-line bg-canvas-subtle p-1.5">
+            <Link
+              href="/settings/sites"
+              className={`${navPill} ${pathname.startsWith('/settings/sites') ? navPillActive : ''}`}
+            >
               사이트
             </Link>
-            <Link href="/settings/users" className="underline underline-offset-4">
+            <Link
+              href="/settings/users"
+              className={`${navPill} ${pathname.startsWith('/settings/users') ? navPillActive : ''}`}
+            >
               회원
             </Link>
-            <Link href="/settings/user-sites" className="underline underline-offset-4">
-              회원-사이트 매핑
+            <Link
+              href="/settings/user-sites"
+              className={`${navPill} ${pathname.startsWith('/settings/user-sites') ? navPillActive : ''}`}
+            >
+              매핑
             </Link>
           </nav>
         </div>

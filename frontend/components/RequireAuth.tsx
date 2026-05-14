@@ -28,8 +28,8 @@ export function RequireAuth({
 
   if (loading || !user) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center text-sm text-neutral-500">
-        불러오는 중…
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <div className="ui-card-muted px-8 py-6 text-sm text-ink-secondary">불러오는 중…</div>
       </div>
     );
   }

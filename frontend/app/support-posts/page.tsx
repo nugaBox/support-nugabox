@@ -84,37 +84,36 @@ function SupportPostsInner() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-widest text-neutral-500">{heading}</p>
-          <h1 className="text-2xl font-semibold">문의 목록</h1>
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+            {heading}
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">문의 목록</h1>
         </div>
-        <Link
-          href="/support-posts/new"
-          className="inline-flex justify-center rounded-md border border-neutral-900 px-4 py-2 text-sm dark:border-white"
-        >
+        <Link href="/support-posts/new" className="ui-btn-primary shrink-0 px-6">
           문의 등록
         </Link>
       </div>
 
-      <div className="grid gap-3 rounded-lg border border-neutral-200 p-4 dark:border-neutral-800 md:grid-cols-2 lg:grid-cols-3">
-        <label className="text-xs">
+      <div className="ui-card grid gap-4 p-5 md:grid-cols-2 md:p-6 lg:grid-cols-3">
+        <label className="text-xs font-medium text-ink-secondary">
           검색
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="제목·본문"
-            className="mt-1 w-full rounded border border-neutral-300 bg-transparent px-2 py-1.5 dark:border-neutral-600"
+            className="ui-input mt-1.5"
           />
         </label>
-        <label className="text-xs">
+        <label className="text-xs font-medium text-ink-secondary">
           사이트
           <SiteFilter value={siteId} onChange={setSiteId} />
         </label>
-        <label className="text-xs">
+        <label className="text-xs font-medium text-ink-secondary">
           상태
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="mt-1 w-full rounded border border-neutral-300 bg-transparent px-2 py-1.5 dark:border-neutral-600"
+            className="ui-input mt-1.5"
           >
             <option value="">전체</option>
             {Object.entries(STATUS_LABEL).map(([k, v]) => (
@@ -124,12 +123,12 @@ function SupportPostsInner() {
             ))}
           </select>
         </label>
-        <label className="text-xs">
+        <label className="text-xs font-medium text-ink-secondary">
           분류
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 w-full rounded border border-neutral-300 bg-transparent px-2 py-1.5 dark:border-neutral-600"
+            className="ui-input mt-1.5"
           >
             <option value="">전체</option>
             {Object.entries(CATEGORY_LABEL).map(([k, v]) => (
@@ -139,31 +138,31 @@ function SupportPostsInner() {
             ))}
           </select>
         </label>
-        <label className="text-xs">
+        <label className="text-xs font-medium text-ink-secondary">
           작성일(from)
           <input
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
-            className="mt-1 w-full rounded border border-neutral-300 bg-transparent px-2 py-1.5 dark:border-neutral-600"
+            className="ui-input mt-1.5"
           />
         </label>
-        <label className="text-xs">
+        <label className="text-xs font-medium text-ink-secondary">
           작성일(to)
           <input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
-            className="mt-1 w-full rounded border border-neutral-300 bg-transparent px-2 py-1.5 dark:border-neutral-600"
+            className="ui-input mt-1.5"
           />
         </label>
         {user?.role === 'ADMIN' && (
-          <label className="text-xs md:col-span-2">
+          <label className="text-xs font-medium text-ink-secondary md:col-span-2">
             작성자
             <select
               value={authorId}
               onChange={(e) => setAuthorId(e.target.value)}
-              className="mt-1 w-full rounded border border-neutral-300 bg-transparent px-2 py-1.5 dark:border-neutral-600"
+              className="ui-input mt-1.5"
             >
               <option value="">전체</option>
               {users.map((u) => (
@@ -176,14 +175,14 @@ function SupportPostsInner() {
         )}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => {
             setPage(1);
             void load(1);
           }}
-          className="rounded border border-neutral-400 px-3 py-1 text-xs dark:border-neutral-600"
+          className="ui-btn-primary py-2 text-xs"
         >
           필터 적용
         </button>
@@ -200,13 +199,17 @@ function SupportPostsInner() {
             setPage(1);
             setTimeout(() => void load(1), 0);
           }}
-          className="rounded border border-neutral-300 px-3 py-1 text-xs dark:border-neutral-700"
+          className="ui-btn-ghost py-2"
         >
           초기화
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300">
+          {error}
+        </p>
+      )}
 
       {/* 모바일 카드 */}
       <div className="space-y-3 md:hidden">
@@ -214,15 +217,15 @@ function SupportPostsInner() {
           <Link
             key={row.id}
             href={`/support-posts/${row.id}`}
-            className="block rounded-lg border border-neutral-200 p-4 dark:border-neutral-800"
+            className="ui-card block p-4 transition-shadow hover:shadow-float"
           >
-            <p className="font-medium">{row.title}</p>
-            <p className="mt-1 text-xs text-neutral-500">{row.site.name}</p>
+            <p className="font-medium text-ink">{row.title}</p>
+            <p className="mt-1 text-xs text-ink-tertiary">{row.site.name}</p>
             <div className="mt-2 flex flex-wrap gap-2 text-xs">
               <Badge>{CATEGORY_LABEL[row.category] ?? row.category}</Badge>
               <Badge>{STATUS_LABEL[row.status] ?? row.status}</Badge>
             </div>
-            <p className="mt-2 text-xs text-neutral-500">
+            <p className="mt-2 text-xs text-ink-secondary">
               {row.author.name} · {new Date(row.updatedAt).toLocaleString('ko-KR')}
             </p>
           </Link>
@@ -230,43 +233,45 @@ function SupportPostsInner() {
       </div>
 
       {/* 데스크탑 테이블 */}
-      <div className="hidden overflow-x-auto md:block">
+      <div className="ui-card hidden overflow-hidden md:block">
         <table className="w-full border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b border-neutral-200 dark:border-neutral-800">
-              <th className="py-2 pr-4 font-medium">사이트</th>
-              <th className="py-2 pr-4 font-medium">제목</th>
-              <th className="py-2 pr-4 font-medium">분류</th>
-              <th className="py-2 pr-4 font-medium">상태</th>
-              <th className="py-2 pr-4 font-medium">작성자</th>
-              <th className="py-2 pr-4 font-medium">작성일</th>
-              <th className="py-2 font-medium">수정일</th>
+            <tr className="border-b border-line bg-canvas-subtle text-ink-secondary">
+              <th className="px-4 py-3 pr-4 font-medium">사이트</th>
+              <th className="py-3 pr-4 font-medium">제목</th>
+              <th className="py-3 pr-4 font-medium">분류</th>
+              <th className="py-3 pr-4 font-medium">상태</th>
+              <th className="py-3 pr-4 font-medium">작성자</th>
+              <th className="py-3 pr-4 font-medium">작성일</th>
+              <th className="px-4 py-3 font-medium">수정일</th>
             </tr>
           </thead>
           <tbody>
             {data?.items.map((row) => (
-              <tr key={row.id} className="border-b border-neutral-100 dark:border-neutral-900">
-                <td className="py-3 pr-4 align-top text-neutral-600 dark:text-neutral-400">
-                  {row.site.name}
-                </td>
-                <td className="py-3 pr-4 align-top">
-                  <Link href={`/support-posts/${row.id}`} className="hover:underline">
+              <tr
+                key={row.id}
+                className="border-b border-line last:border-0 transition-colors hover:bg-canvas-subtle/80"
+              >
+                <td className="px-4 py-3.5 pr-4 align-top text-ink-secondary">{row.site.name}</td>
+                <td className="py-3.5 pr-4 align-top text-ink">
+                  <Link
+                    href={`/support-posts/${row.id}`}
+                    className="hover:text-ink-secondary hover:underline"
+                  >
                     {row.title}
                   </Link>
                 </td>
-                <td className="py-3 pr-4 align-top">
+                <td className="py-3.5 pr-4 align-top">
                   <Badge>{CATEGORY_LABEL[row.category] ?? row.category}</Badge>
                 </td>
-                <td className="py-3 pr-4 align-top">
+                <td className="py-3.5 pr-4 align-top">
                   <Badge>{STATUS_LABEL[row.status] ?? row.status}</Badge>
                 </td>
-                <td className="py-3 pr-4 align-top text-neutral-600 dark:text-neutral-400">
-                  {row.author.name}
-                </td>
-                <td className="py-3 pr-4 align-top text-xs text-neutral-500">
+                <td className="py-3.5 pr-4 align-top text-ink-secondary">{row.author.name}</td>
+                <td className="py-3.5 pr-4 align-top text-xs text-ink-tertiary">
                   {new Date(row.createdAt).toLocaleDateString('ko-KR')}
                 </td>
-                <td className="py-3 align-top text-xs text-neutral-500">
+                <td className="px-4 py-3.5 align-top text-xs text-ink-tertiary">
                   {new Date(row.updatedAt).toLocaleString('ko-KR')}
                 </td>
               </tr>
@@ -276,7 +281,7 @@ function SupportPostsInner() {
       </div>
 
       {data && (
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-ink-tertiary">
           총 {data.total}건 · {data.page}/{Math.max(1, Math.ceil(data.total / data.pageSize))} 페이지
         </p>
       )}
@@ -287,7 +292,7 @@ function SupportPostsInner() {
             type="button"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded border px-2 py-1 text-xs disabled:opacity-40"
+            className="ui-btn-ghost disabled:opacity-40"
           >
             이전
           </button>
@@ -295,7 +300,7 @@ function SupportPostsInner() {
             type="button"
             disabled={page * data.pageSize >= data.total}
             onClick={() => setPage((p) => p + 1)}
-            className="rounded border px-2 py-1 text-xs disabled:opacity-40"
+            className="ui-btn-ghost disabled:opacity-40"
           >
             다음
           </button>
@@ -306,11 +311,7 @@ function SupportPostsInner() {
 }
 
 function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-block rounded border border-neutral-300 px-2 py-0.5 text-[11px] dark:border-neutral-600">
-      {children}
-    </span>
-  );
+  return <span className="ui-badge">{children}</span>;
 }
 
 function SiteFilter({
@@ -330,7 +331,7 @@ function SiteFilter({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="mt-1 w-full rounded border border-neutral-300 bg-transparent px-2 py-1.5 dark:border-neutral-600"
+      className="ui-input mt-1.5"
     >
       <option value="">전체</option>
       {sites.map((s) => (

@@ -42,29 +42,29 @@ export default function SettingsSitesPage() {
   }
 
   return (
-    <div className="space-y-10">
-      <section>
-        <h2 className="text-lg font-medium">사이트 목록</h2>
+    <div className="space-y-8">
+      <section className="ui-card p-6">
+        <h2 className="text-lg font-semibold tracking-tight text-ink">사이트 목록</h2>
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm text-ink">
             <thead>
-              <tr className="border-b border-neutral-200 dark:border-neutral-800">
-                <th className="py-2">이름</th>
-                <th className="py-2">코드</th>
-                <th className="py-2">활성</th>
-                <th className="py-2">작업</th>
+              <tr className="border-b border-line text-ink-secondary">
+                <th className="py-2.5 font-medium">이름</th>
+                <th className="py-2.5 font-medium">코드</th>
+                <th className="py-2.5 font-medium">활성</th>
+                <th className="py-2.5 font-medium">작업</th>
               </tr>
             </thead>
             <tbody>
               {sites.map((s) => (
-                <tr key={s.id} className="border-b border-neutral-100 dark:border-neutral-900">
-                  <td className="py-2">{s.name}</td>
-                  <td className="py-2">{s.code}</td>
-                  <td className="py-2">{s.isActive ? '예' : '아니오'}</td>
-                  <td className="py-2">
+                <tr key={s.id} className="border-b border-line/70 last:border-0">
+                  <td className="py-2.5">{s.name}</td>
+                  <td className="py-2.5 font-mono text-xs text-ink-secondary">{s.code}</td>
+                  <td className="py-2.5">{s.isActive ? '예' : '아니오'}</td>
+                  <td className="py-2.5">
                     <button
                       type="button"
-                      className="text-xs underline"
+                      className="ui-btn-ghost px-0 text-xs"
                       onClick={() =>
                         void apiJson(`/sites/${s.id}`, {
                           method: 'PATCH',
@@ -76,7 +76,7 @@ export default function SettingsSitesPage() {
                     </button>{' '}
                     <button
                       type="button"
-                      className="text-xs text-red-600"
+                      className="text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400"
                       onClick={() =>
                         window.confirm('삭제(비활성·소프트삭제)할까요?') &&
                         void apiJson(`/sites/${s.id}`, { method: 'DELETE' }).then(load)
@@ -92,30 +92,30 @@ export default function SettingsSitesPage() {
         </div>
       </section>
 
-      <section>
-        <h2 className="text-lg font-medium">사이트 추가</h2>
+      <section className="ui-card p-6">
+        <h2 className="text-lg font-semibold tracking-tight text-ink">사이트 추가</h2>
         <form onSubmit={onCreate} className="mt-4 grid gap-3 md:max-w-lg">
           <input
             placeholder="사이트명"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-600"
+            className="ui-input"
           />
           <input
             placeholder="코드 (예: SITE-C)"
             value={code}
             onChange={(e) => setCode(e.target.value)}
             required
-            className="rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-600"
+            className="ui-input"
           />
           <input
             placeholder="설명 (선택)"
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-600"
+            className="ui-input"
           />
-          <button type="submit" className="rounded border px-4 py-2 text-sm">
+          <button type="submit" className="ui-btn-primary w-fit">
             추가
           </button>
         </form>

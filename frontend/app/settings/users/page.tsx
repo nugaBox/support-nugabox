@@ -43,31 +43,31 @@ export default function SettingsUsersPage() {
   }
 
   return (
-    <div className="space-y-10">
-      <section>
-        <h2 className="text-lg font-medium">회원 목록</h2>
+    <div className="space-y-8">
+      <section className="ui-card p-6">
+        <h2 className="text-lg font-semibold tracking-tight text-ink">회원 목록</h2>
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm text-ink">
             <thead>
-              <tr className="border-b border-neutral-200 dark:border-neutral-800">
-                <th className="py-2">이메일</th>
-                <th className="py-2">이름</th>
-                <th className="py-2">역할</th>
-                <th className="py-2">상태</th>
-                <th className="py-2">작업</th>
+              <tr className="border-b border-line text-ink-secondary">
+                <th className="py-2.5 font-medium">이메일</th>
+                <th className="py-2.5 font-medium">이름</th>
+                <th className="py-2.5 font-medium">역할</th>
+                <th className="py-2.5 font-medium">상태</th>
+                <th className="py-2.5 font-medium">작업</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} className="border-b border-neutral-100 dark:border-neutral-900">
-                  <td className="py-2">{u.email}</td>
-                  <td className="py-2">{u.name}</td>
-                  <td className="py-2">{u.role}</td>
-                  <td className="py-2">{u.isActive ? '활성' : '비활성'}</td>
-                  <td className="py-2 space-x-2">
+                <tr key={u.id} className="border-b border-line/70 last:border-0">
+                  <td className="py-2.5">{u.email}</td>
+                  <td className="py-2.5">{u.name}</td>
+                  <td className="py-2.5 font-mono text-xs text-ink-secondary">{u.role}</td>
+                  <td className="py-2.5">{u.isActive ? '활성' : '비활성'}</td>
+                  <td className="py-2.5">
                     <button
                       type="button"
-                      className="text-xs underline"
+                      className="ui-btn-ghost px-0 text-xs"
                       onClick={() =>
                         void apiJson(`/users/${u.id}/${u.isActive ? 'deactivate' : 'activate'}`, {
                           method: 'PATCH',
@@ -84,8 +84,8 @@ export default function SettingsUsersPage() {
         </div>
       </section>
 
-      <section>
-        <h2 className="text-lg font-medium">회원 추가</h2>
+      <section className="ui-card p-6">
+        <h2 className="text-lg font-semibold tracking-tight text-ink">회원 추가</h2>
         <form onSubmit={onCreate} className="mt-4 grid gap-3 md:max-w-lg">
           <input
             type="email"
@@ -93,14 +93,14 @@ export default function SettingsUsersPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-600"
+            className="ui-input"
           />
           <input
             placeholder="이름"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-600"
+            className="ui-input"
           />
           <input
             type="password"
@@ -108,17 +108,17 @@ export default function SettingsUsersPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-600"
+            className="ui-input"
           />
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as 'ADMIN' | 'MEMBER')}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-600"
+            className="ui-input"
           >
             <option value="MEMBER">MEMBER</option>
             <option value="ADMIN">ADMIN</option>
           </select>
-          <button type="submit" className="rounded border px-4 py-2 text-sm">
+          <button type="submit" className="ui-btn-primary w-fit">
             추가
           </button>
         </form>

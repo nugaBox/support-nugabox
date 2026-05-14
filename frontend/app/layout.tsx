@@ -21,13 +21,16 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
         />
       </head>
-      <body style={{ fontFamily: '"Pretendard", system-ui, sans-serif' }}>
+      <body className="min-h-screen bg-canvas font-sans text-ink antialiased">
         <AuthProvider>
-          <div className="min-h-screen flex flex-col">
+          <div className="flex min-h-screen flex-col">
             <AppHeader />
-            <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 md:px-8">{children}</main>
-            <footer className="border-t border-neutral-200 py-8 text-center text-xs text-neutral-500 dark:border-neutral-800">
-              <p>NUGABOX 고객지원 · 모노톤 UI</p>
+            <main className="relative mx-auto w-full max-w-5xl flex-1 px-4 py-12 md:px-8 md:py-14">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-elevated/40 to-transparent dark:from-elevated/20" />
+              <div className="relative">{children}</div>
+            </main>
+            <footer className="border-t border-line py-10 text-center">
+              <p className="text-xs text-ink-tertiary">NUGABOX 고객지원</p>
             </footer>
           </div>
         </AuthProvider>
