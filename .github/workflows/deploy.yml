@@ -18,7 +18,7 @@ jobs:
         run: |
           set -e
 
-          cd /volume1/Develop/Docker/support
+          cd /volume1/Develop/Docker/support-nugabox
 
           echo "Sync source from GitHub"
           git fetch origin main
