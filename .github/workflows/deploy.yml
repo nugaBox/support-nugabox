@@ -1,0 +1,34 @@
+name: Deploy support-nugabox
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: support-nugabox-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux, dsm, nas, support, deploy]
+
+    steps:
+      - name: Deploy support on Synology
+        run: |
+          set -e
+
+          cd /volume1/Develop/Docker/support
+
+          echo "Sync source from GitHub"
+          git fetch origin main
+          git reset --hard origin/main
+
+          echo "Build Docker images"
+          docker compose build
+
+          echo "Start containers"
+          docker compose up -d
+
+          echo "Show container status"
+          docker compose ps
