@@ -36,7 +36,10 @@ function formatDate(iso: string) {
 export function SupportPostsBoard() {
   const [data, setData] = useState<ListRes | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  /** 입력 중인 검색어 (버튼/Enter 전까지 API에 반영하지 않음) */
+  const [searchDraft, setSearchDraft] = useState('');
+  /** 실제 목록 조회에 사용하는 검색어 */
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [siteId, setSiteId] = useState('');
   const [page, setPage] = useState(1);
 
@@ -46,7 +49,7 @@ export function SupportPostsBoard() {
       const p = overridePage ?? page;
       try {
         const params = new URLSearchParams();
-        if (search.trim()) params.set('search', search.trim());
+        if (appliedSearch.trim()) params.set('search', appliedSearch.trim());
         if (siteId) params.set('siteId', siteId);
         params.set('page', String(p));
         params.set('pageSize', String(PAGE_SIZE));
@@ -60,7 +63,7 @@ export function SupportPostsBoard() {
         setError(e instanceof Error ? e.message : '목록 조회 실패');
       }
     },
-    [search, siteId, page],
+    [appliedSearch, siteId, page],
   );
 
   useEffect(() => {
@@ -68,8 +71,8 @@ export function SupportPostsBoard() {
   }, [load]);
 
   function runSearch() {
+    setAppliedSearch(searchDraft.trim());
     setPage(1);
-    void load(1);
   }
 
   function goPage(next: number) {
@@ -112,8 +115,8 @@ export function SupportPostsBoard() {
         <label className="flex min-w-0 flex-[2] flex-col gap-1.5 text-xs font-medium text-ink-secondary">
           검색
           <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchDraft}
+            onChange={(e) => setSearchDraft(e.target.value)}
             placeholder="제목·본문"
             className="ui-input py-2 text-sm"
             onKeyDown={(e) => {
@@ -131,7 +134,8 @@ export function SupportPostsBoard() {
           <button
             type="button"
             onClick={() => {
-              setSearch('');
+              setSearchDraft('');
+              setAppliedSearch('');
               setSiteId('');
               setPage(1);
             }}
