@@ -48,11 +48,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        INTERNAL_API_ORIGIN: http://backend:4000
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6040/api}
     restart: unless-stopped
     depends_on:
       - backend
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6041}
+      INTERNAL_API_ORIGIN: http://backend:4000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6040/api}
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
     expose:

@@ -18,9 +18,12 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6041}
+        INTERNAL_API_ORIGIN: http://backend:4000
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6040/api}
     command: npm run start
     ports:
       - "${FRONTEND_PORT:-6040}:3000"
     environment:
       NODE_ENV: production
+      INTERNAL_API_ORIGIN: http://backend:4000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6040/api}

@@ -11,6 +11,7 @@ import {
 import {
   apiJson,
   clearStoredTokens,
+  getApiBase,
   getStoredAccessToken,
   getStoredRefreshToken,
   setStoredTokens,
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [refreshUser]);
 
   const login = useCallback(async (username: string, password: string) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:6041'}/auth/login`, {
+    const res = await fetch(`${getApiBase()}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),

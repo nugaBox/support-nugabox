@@ -2,9 +2,13 @@
 const ACCESS_KEY = 'nugabox_access_token';
 const REFRESH_KEY = 'nugabox_refresh_token';
 
+/** 브라우저/SSR이 호출하는 API 베이스(동일 출처 /api 프록시 권장) */
 export function getApiBase(): string {
-  const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:6041';
-  return base.replace(/\/$/, '');
+  const env = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (env) return env.replace(/\/$/, '');
+  if (typeof window !== 'undefined') return '/api';
+  const port = process.env.PORT || '3000';
+  return `http://127.0.0.1:${port}/api`;
 }
 
 export function getStoredAccessToken(): string | null {
