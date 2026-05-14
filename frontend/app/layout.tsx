@@ -2,10 +2,22 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { AppHeader } from '@/components/AppHeader';
+import { getMetadataBaseUrl } from '@/lib/site-url';
+
+const ogImagePath = '/meta_thumbnail.jpg';
 
 export const metadata: Metadata = {
+  metadataBase: getMetadataBaseUrl(),
   title: 'NUGABOX 고객지원',
   description: 'NUGABOX 고객지원 게시판',
+  openGraph: {
+    type: 'website',
+    images: [{ url: ogImagePath, alt: 'NUGABOX 고객지원' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: [ogImagePath],
+  },
   manifest: '/favicon/site.webmanifest',
   icons: {
     icon: [

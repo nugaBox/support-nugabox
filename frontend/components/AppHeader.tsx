@@ -28,7 +28,7 @@ export function AppHeader() {
               alt="NUGABOX"
               width={874}
               height={200}
-              className="h-8 w-auto max-w-[min(100%,220px)] object-contain md:h-9 md:max-w-[260px]"
+              className="h-8 w-auto max-w-[min(100%,220px)] object-contain object-left md:h-9 md:max-w-[260px]"
               priority
             />
             <span className="text-lg font-bold tracking-tight text-ink md:text-xl">고객지원</span>
