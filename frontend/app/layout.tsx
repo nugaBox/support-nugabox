@@ -6,6 +6,26 @@ import { AppHeader } from '@/components/AppHeader';
 export const metadata: Metadata = {
   title: 'NUGABOX 고객지원',
   description: 'NUGABOX 고객지원 게시판',
+  manifest: '/favicon/site.webmanifest',
+  icons: {
+    icon: [
+      { url: '/favicon/favicon.ico', sizes: 'any' },
+      { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/favicon/apple-touch-icon.png',
+    other: [
+      {
+        rel: 'mask-icon',
+        url: '/favicon/safari-pinned-tab.svg',
+        color: '#272b35',
+      },
+    ],
+  },
+  other: {
+    'msapplication-TileColor': '#272b35',
+    'msapplication-config': '/favicon/browserconfig.xml',
+  },
 };
 
 export default function RootLayout({

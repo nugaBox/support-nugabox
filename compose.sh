@@ -45,10 +45,10 @@ case "$cmd" in
         _dev_compose logs -f "${@:-}"
         ;;
       migrate)
-        _dev_compose exec backend sh -lc 'npx prisma migrate deploy'
+        _dev_compose exec backend sh -lc 'npx prisma migrate deploy && npx prisma generate'
         ;;
       seed)
-        _dev_compose exec backend sh -lc 'npx prisma db seed'
+        _dev_compose exec backend sh -lc 'npx prisma generate && npx prisma db seed'
         ;;
       *)
         echo "사용법: $0 dev {up|down|logs|migrate|seed}"
@@ -71,7 +71,7 @@ case "$cmd" in
         _prod_compose logs -f "${@:-}"
         ;;
       migrate)
-        _prod_compose exec backend sh -lc 'npx prisma migrate deploy'
+        _prod_compose exec backend sh -lc 'npx prisma migrate deploy && npx prisma generate'
         ;;
       *)
         echo "사용법: $0 prod {up|down|logs|migrate}"
