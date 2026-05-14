@@ -20,6 +20,7 @@ export default function SettingsUsersPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selection, setSelection] = useState<Record<string, boolean>>({});
   const [modalOpen, setModalOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -52,6 +53,7 @@ export default function SettingsUsersPage() {
 
   function closeUserModal() {
     setModalOpen(false);
+    setFormError(null);
     setUsername('');
     setName('');
     setPassword('');
@@ -60,17 +62,22 @@ export default function SettingsUsersPage() {
 
   async function onCreateUser(e: FormEvent) {
     e.preventDefault();
-    await apiJson('/users', {
-      method: 'POST',
-      body: JSON.stringify({
-        username,
-        password,
-        name,
-        role,
-      }),
-    });
-    closeUserModal();
-    loadUsers();
+    setFormError(null);
+    try {
+      await apiJson('/users', {
+        method: 'POST',
+        body: JSON.stringify({
+          username,
+          password,
+          name,
+          role,
+        }),
+      });
+      closeUserModal();
+      loadUsers();
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : '추가에 실패했습니다.');
+    }
   }
 
   async function saveMapping(userId: string) {
@@ -82,6 +89,8 @@ export default function SettingsUsersPage() {
         body: JSON.stringify({ siteIds }),
       });
       alert('저장되었습니다.');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : '저장에 실패했습니다.');
     } finally {
       setSavingMap(false);
     }
@@ -182,6 +191,11 @@ export default function SettingsUsersPage() {
 
       <Modal open={modalOpen} title="회원 추가" onClose={closeUserModal}>
         <form onSubmit={onCreateUser} className="grid gap-3">
+          {formError && (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300">
+              {formError}
+            </p>
+          )}
           <input
             type="text"
             placeholder="아이디 (영문·숫자·._-)"

@@ -15,6 +15,7 @@ type Site = {
 export default function SettingsSitesPage() {
   const [sites, setSites] = useState<Site[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [desc, setDesc] = useState('');
@@ -28,6 +29,7 @@ export default function SettingsSitesPage() {
 
   function closeModal() {
     setModalOpen(false);
+    setFormError(null);
     setName('');
     setCode('');
     setDesc('');
@@ -35,17 +37,22 @@ export default function SettingsSitesPage() {
 
   async function onCreate(e: FormEvent) {
     e.preventDefault();
-    await apiJson('/sites', {
-      method: 'POST',
-      body: JSON.stringify({
-        name,
-        code,
-        description: desc || undefined,
-        isActive: true,
-      }),
-    });
-    closeModal();
-    load();
+    setFormError(null);
+    try {
+      await apiJson('/sites', {
+        method: 'POST',
+        body: JSON.stringify({
+          name,
+          code,
+          description: desc || undefined,
+          isActive: true,
+        }),
+      });
+      closeModal();
+      load();
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : '추가에 실패했습니다.');
+    }
   }
 
   return (
@@ -108,6 +115,11 @@ export default function SettingsSitesPage() {
 
       <Modal open={modalOpen} title="사이트 추가" onClose={closeModal}>
         <form onSubmit={onCreate} className="grid gap-3">
+          {formError && (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300">
+              {formError}
+            </p>
+          )}
           <input
             placeholder="사이트명"
             value={name}

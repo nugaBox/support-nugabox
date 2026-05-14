@@ -48,6 +48,15 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   if (token && !headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${token}`);
   }
+  /** JSON 본문인데 Content-Type이 없으면 Nest/Express가 body를 파싱하지 못함 */
+  if (
+    init.body !== undefined &&
+    typeof init.body === 'string' &&
+    init.body.length > 0 &&
+    !headers.has('Content-Type')
+  ) {
+    headers.set('Content-Type', 'application/json');
+  }
 
   let res = await fetch(url, { ...init, headers });
 
@@ -56,6 +65,14 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
     if (newAccess) {
       const h2 = new Headers(init.headers);
       h2.set('Authorization', `Bearer ${newAccess}`);
+      if (
+        init.body !== undefined &&
+        typeof init.body === 'string' &&
+        init.body.length > 0 &&
+        !h2.has('Content-Type')
+      ) {
+        h2.set('Content-Type', 'application/json');
+      }
       res = await fetch(url, { ...init, headers: h2 });
     }
   }
@@ -69,7 +86,9 @@ export async function apiJson<T>(path: string, init: RequestInit = {}): Promise<
     let msg = res.statusText;
     try {
       const body = await res.json();
-      msg = (body as { message?: string | string[] }).message?.toString() ?? msg;
+      const m = (body as { message?: string | string[] }).message;
+      if (Array.isArray(m)) msg = m.join(', ');
+      else if (typeof m === 'string') msg = m;
     } catch {
       /* ignore */
     }
