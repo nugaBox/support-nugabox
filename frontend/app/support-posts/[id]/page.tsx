@@ -7,7 +7,8 @@ import { apiJson, downloadBinary } from '@/lib/api';
 import { RequireAuth } from '@/components/RequireAuth';
 import { SafeHtml } from '@/components/SafeHtml';
 import { useAuth } from '@/lib/auth';
-import { CATEGORY_LABEL, STATUS_LABEL } from '@/lib/labels';
+import { CategoryBadge, StatusBadge } from '@/components/SupportPostBadges';
+import { STATUS_LABEL } from '@/lib/labels';
 
 type Detail = {
   id: string;
@@ -164,19 +165,22 @@ function Inner() {
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-ink">{post.title}</h1>
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
-            <Badge>{CATEGORY_LABEL[post.category] ?? post.category}</Badge>
-            <Badge>{STATUS_LABEL[post.status] ?? post.status}</Badge>
+            <CategoryBadge category={post.category} />
+            <StatusBadge status={post.status} />
           </div>
         </div>
         {canManage && (
-          <div className="flex gap-2">
-            <Link href={`/support-posts/${id}/edit`} className="ui-btn-secondary py-2 text-xs">
+          <div className="flex shrink-0 gap-2">
+            <Link
+              href={`/support-posts/${id}/edit`}
+              className="inline-flex items-center justify-center rounded-lg border border-line bg-elevated px-3 py-2 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-elevated-hover"
+            >
               수정
             </Link>
             <button
               type="button"
               onClick={() => void removePost()}
-              className="rounded border border-red-600 px-3 py-1 text-xs text-red-700 dark:text-red-400"
+              className="inline-flex items-center justify-center rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-800 transition-colors hover:bg-rose-100 dark:border-rose-800/60 dark:bg-rose-950/35 dark:text-rose-200 dark:hover:bg-rose-950/55"
             >
               삭제
             </button>
@@ -194,8 +198,8 @@ function Inner() {
           <dd className="mt-1 text-ink">{new Date(post.createdAt).toLocaleString('ko-KR')}</dd>
         </div>
         <div>
-          <dt className="text-xs font-medium text-ink-tertiary">수정일</dt>
-          <dd className="mt-1 text-ink">{new Date(post.updatedAt).toLocaleString('ko-KR')}</dd>
+          <dt className="text-xs font-medium text-ink-tertiary">처리일</dt>
+          <dd className="mt-1 text-ink">{new Date(post.updatedAt).toLocaleDateString('ko-KR')}</dd>
         </div>
       </dl>
 
@@ -344,8 +348,4 @@ function Inner() {
       </section>
     </article>
   );
-}
-
-function Badge({ children }: { children: React.ReactNode }) {
-  return <span className="ui-badge">{children}</span>;
 }

@@ -29,9 +29,7 @@ export function AppHeader() {
             className="h-8 w-auto max-w-[min(100%,220px)] object-contain object-left md:h-9 md:max-w-[260px]"
             priority
           />
-          <span className="hidden text-[15px] font-medium tracking-tight text-ink-tertiary sm:inline">
-            고객지원
-          </span>
+          <span className="text-xl font-bold tracking-tight text-ink md:text-2xl">고객지원</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -47,12 +45,6 @@ export function AppHeader() {
                 }`}
               >
                 문의
-              </Link>
-              <Link
-                href="/support-posts/new"
-                className={`${navBase} ${pathname === '/support-posts/new' ? navActive : ''}`}
-              >
-                등록
               </Link>
               {user.role === 'ADMIN' && (
                 <Link
@@ -106,9 +98,6 @@ export function AppHeader() {
               <>
                 <Link href="/support-posts" className={navBase} onClick={() => setOpen(false)}>
                   문의 목록
-                </Link>
-                <Link href="/support-posts/new" className={navBase} onClick={() => setOpen(false)}>
-                  문의 등록
                 </Link>
                 {user.role === 'ADMIN' && (
                   <Link href="/settings/sites" className={navBase} onClick={() => setOpen(false)}>

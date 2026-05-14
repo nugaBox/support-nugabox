@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { apiJson } from '@/lib/api';
-import { useAuth } from '@/lib/auth';
-import { CATEGORY_LABEL, STATUS_LABEL } from '@/lib/labels';
+import { STATUS_LABEL } from '@/lib/labels';
+import { CategoryBadge, StatusBadge } from '@/components/SupportPostBadges';
 
 type Row = {
   id: string;
@@ -17,21 +17,28 @@ type Row = {
   updatedAt: string;
 };
 
-type ListRes = { items: Row[]; total: number; page: number; pageSize: number };
+type ListRes = {
+  items: Row[];
+  total: number;
+  page: number;
+  pageSize: number;
+  statusCounts?: Record<string, number>;
+};
+
+const PAGE_SIZE = 10;
+
+const STATUS_ORDER = ['WAITING', 'IN_PROGRESS', 'REJECTED', 'DONE', 'STOPPED'] as const;
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('ko-KR');
+}
 
 export function SupportPostsBoard() {
-  const { user } = useAuth();
   const [data, setData] = useState<ListRes | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [siteId, setSiteId] = useState('');
-  const [status, setStatus] = useState('');
-  const [category, setCategory] = useState('');
-  const [authorId, setAuthorId] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
-  const [users, setUsers] = useState<{ id: string; name: string; username: string }[]>([]);
 
   const load = useCallback(
     async (overridePage?: number) => {
@@ -41,160 +48,110 @@ export function SupportPostsBoard() {
         const params = new URLSearchParams();
         if (search.trim()) params.set('search', search.trim());
         if (siteId) params.set('siteId', siteId);
-        if (status) params.set('status', status);
-        if (category) params.set('category', category);
-        if (dateFrom) params.set('dateFrom', dateFrom);
-        if (dateTo) params.set('dateTo', dateTo);
-        if (user?.role === 'ADMIN' && authorId) params.set('authorId', authorId);
         params.set('page', String(p));
-        params.set('pageSize', '20');
+        params.set('pageSize', String(PAGE_SIZE));
         const qs = params.toString();
         const res = await apiJson<ListRes>(`/support-posts?${qs}`);
-        setData(res);
+        setData({
+          ...res,
+          statusCounts: res.statusCounts ?? {},
+        });
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : '목록 조회 실패');
       }
     },
-    [search, siteId, status, category, authorId, dateFrom, dateTo, page, user?.role],
+    [search, siteId, page],
   );
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  useEffect(() => {
-    if (user?.role !== 'ADMIN') return;
-    void apiJson<{ id: string; name: string; username: string }[]>('/users')
-      .then(setUsers)
-      .catch(() => undefined);
-  }, [user?.role]);
+  function runSearch() {
+    setPage(1);
+    void load(1);
+  }
 
-  const heading = user?.role === 'ADMIN' ? '전체 문의' : '내 문의';
+  function goPage(next: number) {
+    setPage(next);
+  }
+
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
+
+  const pageButtons = (() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const cur = page;
+    const set = new Set<number>();
+    set.add(1);
+    set.add(totalPages);
+    for (let d = -2; d <= 2; d++) {
+      const n = cur + d;
+      if (n >= 1 && n <= totalPages) set.add(n);
+    }
+    return [...set].sort((a, b) => a - b);
+  })();
+
+  const counts = data?.statusCounts;
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
-            {heading}
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">문의 목록</h1>
-        </div>
-        <Link href="/support-posts/new" className="ui-btn-primary shrink-0 px-6">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">문의 목록</h1>
+        <Link href="/support-posts/new" className="ui-btn-primary w-full shrink-0 px-6 sm:w-auto">
           문의 등록
         </Link>
       </div>
 
-      <div className="ui-card grid gap-4 p-5 md:grid-cols-2 md:p-6 lg:grid-cols-3">
-        <label className="text-xs font-medium text-ink-secondary">
+      <div className="ui-card flex flex-col gap-3 p-4 sm:flex-row sm:flex-wrap sm:items-end">
+        <label className="flex min-w-[140px] flex-1 flex-col gap-1.5 text-xs font-medium text-ink-secondary sm:max-w-[200px]">
+          사이트
+          <SiteFilter value={siteId} onChange={setSiteId} />
+        </label>
+        <label className="flex min-w-0 flex-[2] flex-col gap-1.5 text-xs font-medium text-ink-secondary">
           검색
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="제목·본문"
-            className="ui-input mt-1.5"
+            className="ui-input py-2 text-sm"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                runSearch();
+              }
+            }}
           />
         </label>
-        <label className="text-xs font-medium text-ink-secondary">
-          사이트
-          <SiteFilter value={siteId} onChange={setSiteId} />
-        </label>
-        <label className="text-xs font-medium text-ink-secondary">
-          상태
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="ui-input mt-1.5"
+        <div className="flex shrink-0 gap-2">
+          <button type="button" onClick={() => runSearch()} className="ui-btn-primary px-4 py-2 text-xs">
+            검색
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSearch('');
+              setSiteId('');
+              setPage(1);
+            }}
+            className="ui-btn-ghost px-3 py-2 text-xs"
           >
-            <option value="">전체</option>
-            {Object.entries(STATUS_LABEL).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-xs font-medium text-ink-secondary">
-          분류
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="ui-input mt-1.5"
-          >
-            <option value="">전체</option>
-            {Object.entries(CATEGORY_LABEL).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-xs font-medium text-ink-secondary">
-          작성일(from)
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-            className="ui-input mt-1.5"
-          />
-        </label>
-        <label className="text-xs font-medium text-ink-secondary">
-          작성일(to)
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-            className="ui-input mt-1.5"
-          />
-        </label>
-        {user?.role === 'ADMIN' && (
-          <label className="text-xs font-medium text-ink-secondary md:col-span-2">
-            작성자
-            <select
-              value={authorId}
-              onChange={(e) => setAuthorId(e.target.value)}
-              className="ui-input mt-1.5"
-            >
-              <option value="">전체</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name} ({u.username})
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+            초기화
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => {
-            setPage(1);
-            void load(1);
-          }}
-          className="ui-btn-primary py-2 text-xs"
-        >
-          필터 적용
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setSearch('');
-            setSiteId('');
-            setStatus('');
-            setCategory('');
-            setAuthorId('');
-            setDateFrom('');
-            setDateTo('');
-            setPage(1);
-            setTimeout(() => void load(1), 0);
-          }}
-          className="ui-btn-ghost py-2"
-        >
-          초기화
-        </button>
-      </div>
+      {counts && data && (
+        <p className="text-sm text-ink-secondary">
+          전체 <span className="font-semibold text-ink">{data.total}</span>건
+          {STATUS_ORDER.map((key) => (
+            <span key={key} className="ml-3">
+              {STATUS_LABEL[key]} <span className="font-medium text-ink">{counts[key] ?? 0}</span>건
+            </span>
+          ))}
+        </p>
+      )}
 
       {error && (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300">
@@ -209,14 +166,14 @@ export function SupportPostsBoard() {
             href={`/support-posts/${row.id}`}
             className="ui-card block p-4 transition-shadow hover:shadow-float"
           >
-            <p className="font-medium text-ink">{row.title}</p>
-            <p className="mt-1 text-xs text-ink-tertiary">{row.site.name}</p>
-            <div className="mt-2 flex flex-wrap gap-2 text-xs">
-              <Badge>{CATEGORY_LABEL[row.category] ?? row.category}</Badge>
-              <Badge>{STATUS_LABEL[row.status] ?? row.status}</Badge>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <CategoryBadge category={row.category} />
+              <StatusBadge status={row.status} />
             </div>
+            <p className="mt-2 text-xs text-ink-tertiary">{row.site.name}</p>
+            <p className="mt-1 font-semibold text-ink">{row.title}</p>
             <p className="mt-2 text-xs text-ink-secondary">
-              {row.author.name} · {new Date(row.updatedAt).toLocaleString('ko-KR')}
+              {row.author.name} · 처리일 {formatDate(row.updatedAt)}
             </p>
           </Link>
         ))}
@@ -226,13 +183,13 @@ export function SupportPostsBoard() {
         <table className="w-full border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-line bg-canvas-subtle text-ink-secondary">
-              <th className="px-4 py-3 pr-4 font-medium">사이트</th>
-              <th className="py-3 pr-4 font-medium">제목</th>
-              <th className="py-3 pr-4 font-medium">분류</th>
-              <th className="py-3 pr-4 font-medium">상태</th>
-              <th className="py-3 pr-4 font-medium">작성자</th>
-              <th className="py-3 pr-4 font-medium">작성일</th>
-              <th className="px-4 py-3 font-medium">수정일</th>
+              <th className="px-4 py-3 pr-3 font-medium">사이트</th>
+              <th className="py-3 pr-3 font-medium">분류</th>
+              <th className="min-w-[8rem] py-3 pr-3 font-medium">제목</th>
+              <th className="py-3 pr-3 font-medium">작성자</th>
+              <th className="py-3 pr-3 font-medium">작성일</th>
+              <th className="py-3 pr-3 font-medium">상태</th>
+              <th className="px-4 py-3 font-medium">처리일</th>
             </tr>
           </thead>
           <tbody>
@@ -241,8 +198,11 @@ export function SupportPostsBoard() {
                 key={row.id}
                 className="border-b border-line last:border-0 transition-colors hover:bg-canvas-subtle/80"
               >
-                <td className="px-4 py-3.5 pr-4 align-top text-ink-secondary">{row.site.name}</td>
-                <td className="py-3.5 pr-4 align-top text-ink">
+                <td className="px-4 py-3.5 pr-3 align-top text-ink-secondary">{row.site.name}</td>
+                <td className="py-3.5 pr-3 align-top">
+                  <CategoryBadge category={row.category} />
+                </td>
+                <td className="py-3.5 pr-3 align-top font-semibold text-ink">
                   <Link
                     href={`/support-posts/${row.id}`}
                     className="hover:text-ink-secondary hover:underline"
@@ -250,18 +210,15 @@ export function SupportPostsBoard() {
                     {row.title}
                   </Link>
                 </td>
-                <td className="py-3.5 pr-4 align-top">
-                  <Badge>{CATEGORY_LABEL[row.category] ?? row.category}</Badge>
+                <td className="py-3.5 pr-3 align-top text-ink-secondary">{row.author.name}</td>
+                <td className="py-3.5 pr-3 align-top text-xs text-ink-tertiary">
+                  {formatDate(row.createdAt)}
                 </td>
-                <td className="py-3.5 pr-4 align-top">
-                  <Badge>{STATUS_LABEL[row.status] ?? row.status}</Badge>
-                </td>
-                <td className="py-3.5 pr-4 align-top text-ink-secondary">{row.author.name}</td>
-                <td className="py-3.5 pr-4 align-top text-xs text-ink-tertiary">
-                  {new Date(row.createdAt).toLocaleDateString('ko-KR')}
+                <td className="py-3.5 pr-3 align-top">
+                  <StatusBadge status={row.status} />
                 </td>
                 <td className="px-4 py-3.5 align-top text-xs text-ink-tertiary">
-                  {new Date(row.updatedAt).toLocaleString('ko-KR')}
+                  {formatDate(row.updatedAt)}
                 </td>
               </tr>
             ))}
@@ -269,38 +226,60 @@ export function SupportPostsBoard() {
         </table>
       </div>
 
-      {data && (
-        <p className="text-xs text-ink-tertiary">
-          총 {data.total}건 · {data.page}/{Math.max(1, Math.ceil(data.total / data.pageSize))} 페이지
-        </p>
-      )}
-
-      {data && data.total > data.pageSize && (
-        <div className="flex gap-2">
+      {data && totalPages > 1 && (
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
           <button
             type="button"
             disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="ui-btn-ghost disabled:opacity-40"
+            onClick={() => goPage(page - 1)}
+            className="ui-btn-ghost min-w-[4rem] py-1.5 text-xs disabled:pointer-events-none disabled:opacity-35"
           >
             이전
           </button>
+          {pageButtons.flatMap((n, idx) => {
+            const prev = pageButtons[idx - 1];
+            const nodes = [];
+            if (idx > 0 && prev !== undefined && prev < n - 1) {
+              nodes.push(
+                <span key={`gap-${n}-${idx}`} className="px-1 text-xs text-ink-tertiary">
+                  …
+                </span>,
+              );
+            }
+            nodes.push(
+              <button
+                key={`p-${n}`}
+                type="button"
+                onClick={() => goPage(n)}
+                className={
+                  n === page
+                    ? 'min-w-[2rem] rounded-lg border border-line bg-accent-soft px-2 py-1.5 text-xs font-semibold text-ink'
+                    : 'min-w-[2rem] rounded-lg px-2 py-1.5 text-xs text-ink-secondary hover:bg-canvas-subtle'
+                }
+              >
+                {n}
+              </button>,
+            );
+            return nodes;
+          })}
           <button
             type="button"
-            disabled={page * data.pageSize >= data.total}
-            onClick={() => setPage((p) => p + 1)}
-            className="ui-btn-ghost disabled:opacity-40"
+            disabled={page >= totalPages}
+            onClick={() => goPage(page + 1)}
+            className="ui-btn-ghost min-w-[4rem] py-1.5 text-xs disabled:pointer-events-none disabled:opacity-35"
           >
             다음
           </button>
         </div>
       )}
+
+      {data && (
+        <p className="text-center text-xs text-ink-tertiary">
+          {PAGE_SIZE}개/페이지 · {data.page}/{totalPages} 페이지
+        </p>
+      )}
     </div>
   );
-}
-
-function Badge({ children }: { children: React.ReactNode }) {
-  return <span className="ui-badge">{children}</span>;
 }
 
 function SiteFilter({
@@ -317,11 +296,7 @@ function SiteFilter({
       .catch(() => undefined);
   }, []);
   return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="ui-input mt-1.5"
-    >
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="ui-input py-2 text-sm">
       <option value="">전체</option>
       {sites.map((s) => (
         <option key={s.id} value={s.id}>

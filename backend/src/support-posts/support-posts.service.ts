@@ -65,8 +65,14 @@ export class SupportPostsService {
       ...(andFilters.length ? { AND: andFilters } : {}),
     };
 
-    const [total, rows] = await this.prisma.$transaction([
+    const [total, statusGroups, rows] = await this.prisma.$transaction([
       this.prisma.supportPost.count({ where }),
+      this.prisma.supportPost.groupBy({
+        by: ['status'],
+        where,
+        _count: { _all: true },
+        orderBy: { status: 'asc' },
+      }),
       this.prisma.supportPost.findMany({
         where,
         skip: (page - 1) * pageSize,
@@ -81,11 +87,22 @@ export class SupportPostsService {
       }),
     ]);
 
+    const statusCounts: Record<string, number> = {};
+    for (const s of Object.values(PostStatus)) {
+      statusCounts[s] = 0;
+    }
+    for (const g of statusGroups) {
+      const c = g._count;
+      const n = typeof c === 'object' && c !== null && '_all' in c ? Number(c._all) : 0;
+      statusCounts[g.status] = n;
+    }
+
     return {
       items: rows.map((r) => this.mapListItem(r)),
       total,
       page,
       pageSize,
+      statusCounts,
     };
   }
 

@@ -2,13 +2,22 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { apiJson, apiUpload } from '@/lib/api';
 import { RequireAuth } from '@/components/RequireAuth';
-import { RichTextEditor } from '@/components/RichTextEditor';
 import { CATEGORY_LABEL } from '@/lib/labels';
 
 type Site = { id: string; name: string; code: string };
+
+function plainTextToSafeHtml(plain: string): string {
+  const esc = plain
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+  if (!esc.trim()) return '<p></p>';
+  return esc.split('\n').join('<br>');
+}
 
 export default function NewSupportPostPage() {
   return (
@@ -20,11 +29,12 @@ export default function NewSupportPostPage() {
 
 function Inner() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [sites, setSites] = useState<Site[]>([]);
   const [siteId, setSiteId] = useState('');
   const [category, setCategory] = useState('FEATURE_INQUIRY');
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('<p></p>');
+  const [content, setContent] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -37,6 +47,12 @@ function Inner() {
       })
       .catch(() => setError('사이트 목록을 불러오지 못했습니다.'));
   }, []);
+
+  function mergeFiles(list: FileList | null) {
+    if (!list?.length) return;
+    const next = [...files, ...Array.from(list)].slice(0, 5);
+    setFiles(next);
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -51,12 +67,13 @@ function Inner() {
     setError(null);
     setPending(true);
     try {
+      const html = plainTextToSafeHtml(content);
       const created = await apiJson<{ id: string }>('/support-posts', {
         method: 'POST',
         body: JSON.stringify({
           siteId,
           title: title.trim(),
-          content,
+          content: html,
           category,
         }),
       });
@@ -126,26 +143,52 @@ function Inner() {
           />
         </label>
 
-        <div className="space-y-2">
-          <span className="text-sm font-medium text-ink-secondary">본문</span>
-          <RichTextEditor value={content} onChange={setContent} />
-        </div>
-
         <label className="block space-y-2">
-          <span className="text-sm font-medium text-ink-secondary">첨부파일 (최대 5개)</span>
-          <input
-            type="file"
-            multiple
-            onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))}
-            className="text-sm text-ink-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-accent-soft file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
+          <span className="text-sm font-medium text-ink-secondary">본문</span>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={12}
+            className="ui-input min-h-[12rem] resize-y font-mono text-sm leading-relaxed"
+            placeholder="내용을 입력하세요."
           />
         </label>
+
+        <div className="space-y-2">
+          <span className="text-sm font-medium text-ink-secondary">첨부파일 (최대 5개)</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="block w-full max-w-lg text-sm text-ink-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-accent-soft file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
+            onChange={(e) => {
+              mergeFiles(e.target.files);
+              e.target.value = '';
+            }}
+          />
+          <button
+            type="button"
+            className="ui-btn-secondary text-xs"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            파일 추가
+          </button>
+          {files.length > 0 && (
+            <ul className="mt-2 space-y-1 text-xs text-ink-secondary">
+              {files.map((f, i) => (
+                <li key={`${f.name}-${i}`}>{f.name}</li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {error && (
           <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300">
             {error}
           </p>
         )}
+
+        <p className="text-xs text-ink-tertiary">문의 등록 시 개발자에게 자동으로 알림이 전달됩니다.</p>
 
         <button type="submit" disabled={pending} className="ui-btn-primary">
           {pending ? '등록 중…' : '등록'}
