@@ -2,10 +2,14 @@
 const ACCESS_KEY = 'nugabox_access_token';
 const REFRESH_KEY = 'nugabox_refresh_token';
 
-/** 브라우저/SSR이 호출하는 API 베이스(동일 출처 /api 프록시 권장) */
+/** 브라우저/SSR이 호출하는 API 베이스. 환경값이 /api 없이 끝나면 자동으로 붙여 Nest 프록시와 맞춘다. */
 export function getApiBase(): string {
   const env = process.env.NEXT_PUBLIC_API_URL?.trim();
-  if (env) return env.replace(/\/$/, '');
+  if (env) {
+    let b = env.replace(/\/$/, '');
+    if (!b.endsWith('/api')) b = `${b}/api`;
+    return b;
+  }
   if (typeof window !== 'undefined') return '/api';
   const port = process.env.PORT || '3000';
   return `http://127.0.0.1:${port}/api`;

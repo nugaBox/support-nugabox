@@ -16,6 +16,27 @@ export function AppHeader() {
   const { user, logout, loading } = useAuth();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const isLogin = pathname === '/login';
+
+  if (isLogin) {
+    return (
+      <header className="sticky top-0 z-40 border-b border-line bg-elevated/80 backdrop-blur-xl dark:bg-elevated/70">
+        <div className="mx-auto flex max-w-5xl justify-center px-4 py-3.5 md:px-8">
+          <div className="flex items-center justify-center gap-3">
+            <Image
+              src="/banner.png"
+              alt="NUGABOX"
+              width={874}
+              height={200}
+              className="h-8 w-auto max-w-[min(100%,220px)] object-contain md:h-9 md:max-w-[260px]"
+              priority
+            />
+            <span className="text-lg font-bold tracking-tight text-ink md:text-xl">고객지원</span>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-elevated/80 backdrop-blur-xl dark:bg-elevated/70">
