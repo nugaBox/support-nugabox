@@ -128,19 +128,36 @@ export default function SettingsUsersPage() {
                     <td className="py-2.5 font-mono text-xs">{u.username}</td>
                     <td className="py-2.5">{u.name}</td>
                     <td className="py-2.5 font-mono text-xs text-ink-secondary">{u.role}</td>
-                    <td className="py-2.5">{u.isActive ? '활성' : '비활성'}</td>
+                    <td className="py-2.5">{u.isActive ? '활성화' : '비활성화'}</td>
                     <td className="py-2.5" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        type="button"
-                        className="settings-btn"
-                        onClick={() =>
-                          void apiJson(`/users/${u.id}/${u.isActive ? 'deactivate' : 'activate'}`, {
-                            method: 'PATCH',
-                          }).then(loadUsers)
-                        }
-                      >
-                        {u.isActive ? '비활성화' : '활성화'}
-                      </button>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="settings-btn"
+                          onClick={() =>
+                            void apiJson(`/users/${u.id}/${u.isActive ? 'deactivate' : 'activate'}`, {
+                              method: 'PATCH',
+                            }).then(loadUsers)
+                          }
+                        >
+                          {u.isActive ? '비활성화' : '활성화'}
+                        </button>
+                        <button
+                          type="button"
+                          className="settings-btn-danger"
+                          onClick={() =>
+                            window.confirm(
+                              '이 회원을 아카이브할까요? 목록에서는 보이지 않으며 DB에는 그대로 보관됩니다. 로그인도 불가능해집니다.',
+                            ) &&
+                            void apiJson(`/users/${u.id}`, { method: 'DELETE' }).then(() => {
+                              setExpandedId((cur) => (cur === u.id ? null : cur));
+                              loadUsers();
+                            })
+                          }
+                        >
+                          아카이브
+                        </button>
+                      </div>
                     </td>
                   </tr>
                   {expandedId === u.id && (
