@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
@@ -9,6 +10,8 @@ const navBase =
   'rounded-lg px-2.5 py-1.5 text-sm text-ink-secondary transition-colors hover:bg-accent-soft hover:text-ink';
 const navActive = 'bg-accent-soft font-medium text-ink';
 
+const devLinkClass = 'ui-btn-primary ml-2 py-2 text-xs';
+
 export function AppHeader() {
   const { user, logout, loading } = useAuth();
   const pathname = usePathname();
@@ -17,12 +20,18 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-elevated/80 backdrop-blur-xl dark:bg-elevated/70">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3.5 md:px-8">
-        <Link
-          href="/"
-          className="text-[15px] font-semibold tracking-tight text-ink"
-        >
-          NUGABOX
-          <span className="ml-1.5 font-normal text-ink-tertiary">Support</span>
+        <Link href="/" className="flex min-w-0 shrink items-center gap-3">
+          <Image
+            src="/banner.png"
+            alt="NUGABOX"
+            width={874}
+            height={200}
+            className="h-8 w-auto max-w-[min(100%,220px)] object-contain object-left md:h-9 md:max-w-[260px]"
+            priority
+          />
+          <span className="hidden text-[15px] font-medium tracking-tight text-ink-tertiary sm:inline">
+            고객지원
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -30,7 +39,12 @@ export function AppHeader() {
             <>
               <Link
                 href="/support-posts"
-                className={`${navBase} ${pathname.startsWith('/support-posts') && pathname !== '/support-posts/new' ? navActive : ''}`}
+                className={`${navBase} ${
+                  pathname === '/' ||
+                  (pathname.startsWith('/support-posts') && !pathname.startsWith('/support-posts/new'))
+                    ? navActive
+                    : ''
+                }`}
               >
                 문의
               </Link>
@@ -64,9 +78,14 @@ export function AppHeader() {
               로그아웃
             </button>
           ) : (
-            <Link href="/login" className="ui-btn-primary ml-2 py-2 text-xs">
-              로그인
-            </Link>
+            <a
+              href="https://nugabox.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={devLinkClass}
+            >
+              개발자
+            </a>
           )}
         </nav>
 
@@ -103,9 +122,15 @@ export function AppHeader() {
                 로그아웃
               </button>
             ) : (
-              <Link href="/login" className={navBase} onClick={() => setOpen(false)}>
-                로그인
-              </Link>
+              <a
+                href="https://nugabox.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={navBase}
+                onClick={() => setOpen(false)}
+              >
+                개발자
+              </a>
             )}
           </div>
         </div>

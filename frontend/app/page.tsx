@@ -1,8 +1,27 @@
-import Link from 'next/link';
+'use client';
+
+import { Suspense } from 'react';
+import { useAuth } from '@/lib/auth';
+import { SupportPostsBoard } from '@/components/SupportPostsBoard';
+import { HomeLoginForm } from '@/components/HomeLoginForm';
 
 export default function HomePage() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <p className="text-sm text-ink-tertiary">불러오는 중…</p>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <SupportPostsBoard />;
+  }
+
   return (
-    <div className="mx-auto max-w-lg space-y-10">
+    <div className="mx-auto max-w-lg space-y-6">
       <div className="ui-card space-y-5 p-8 md:p-10">
         <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-ink-tertiary">
           Customer support
@@ -16,18 +35,15 @@ export default function HomePage() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-        <Link href="/login" className="ui-btn-primary flex-1 text-center">
-          로그인
-        </Link>
-        <Link href="/login?next=%2Fsupport-posts%2Fnew" className="ui-btn-secondary flex-1 text-center">
-          문의 등록
-        </Link>
-      </div>
-
-      <p className="px-1 text-center text-xs text-ink-tertiary">
-        문의 등록은 로그인이 필요하면 로그인 화면으로 이동한 뒤, 원래 페이지로 돌아옵니다.
-      </p>
+      <Suspense
+        fallback={
+          <div className="ui-card p-8 text-center text-sm text-ink-tertiary">로딩 중…</div>
+        }
+      >
+        <div className="ui-card p-6 md:p-8">
+          <HomeLoginForm />
+        </div>
+      </Suspense>
     </div>
   );
 }

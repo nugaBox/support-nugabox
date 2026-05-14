@@ -30,7 +30,9 @@ export default function RootLayout({
               <div className="relative">{children}</div>
             </main>
             <footer className="border-t border-line py-10 text-center">
-              <p className="text-xs text-ink-tertiary">NUGABOX 고객지원</p>
+              <p className="text-xs text-ink-tertiary">
+                © 2026 NUGABOX. All rights reserved.
+              </p>
             </footer>
           </div>
         </AuthProvider>
