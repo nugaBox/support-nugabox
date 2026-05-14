@@ -75,7 +75,7 @@ export class SupportPostsService {
         include: {
           site: true,
           author: {
-            select: { id: true, name: true, email: true, role: true },
+            select: { id: true, name: true, username: true, role: true },
           },
         },
       }),
@@ -94,7 +94,7 @@ export class SupportPostsService {
       where: { id, deleted_at: null },
       include: {
         site: true,
-        author: { select: { id: true, name: true, email: true, role: true } },
+        author: { select: { id: true, name: true, username: true, role: true } },
         attachments: {
           where: { deleted_at: null },
           orderBy: { created_at: 'asc' },
@@ -134,7 +134,7 @@ export class SupportPostsService {
       },
       include: {
         site: true,
-        author: { select: { id: true, name: true, email: true, role: true } },
+        author: { select: { id: true, name: true, username: true, role: true } },
       },
     });
     void this.notifications
@@ -164,7 +164,7 @@ export class SupportPostsService {
       },
       include: {
         site: true,
-        author: { select: { id: true, name: true, email: true, role: true } },
+        author: { select: { id: true, name: true, username: true, role: true } },
         attachments: {
           where: { deleted_at: null },
           orderBy: { created_at: 'asc' },
@@ -250,7 +250,7 @@ export class SupportPostsService {
       data: { progress_note: note },
       include: {
         site: true,
-        author: { select: { id: true, name: true, email: true, role: true } },
+        author: { select: { id: true, name: true, username: true, role: true } },
         attachments: {
           where: { deleted_at: null },
           orderBy: { created_at: 'asc' },
@@ -297,7 +297,7 @@ export class SupportPostsService {
     created_at: Date;
     updated_at: Date;
     site: { id: string; name: string };
-    author: { id: string; name: string; email: string; role: Role };
+    author: { id: string; name: string; username: string; role: Role };
   }) {
     return {
       id: row.id,
@@ -308,7 +308,7 @@ export class SupportPostsService {
       author: {
         id: row.author.id,
         name: row.author.name,
-        email: row.author.email,
+        username: row.author.username,
         role: row.author.role,
       },
       createdAt: row.created_at.toISOString(),
@@ -327,7 +327,7 @@ export class SupportPostsService {
       created_at: Date;
       updated_at: Date;
       site: { id: string; name: string; code: string };
-      author: { id: string; name: string; email: string; role: Role };
+      author: { id: string; name: string; username: string; role: Role };
       attachments: Array<{
         id: string;
         original_name: string;

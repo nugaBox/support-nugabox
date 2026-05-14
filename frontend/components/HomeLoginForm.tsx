@@ -11,7 +11,7 @@ export function HomeLoginForm() {
   const searchParams = useSearchParams();
   const nextPath = searchParams.get('next') ?? '/';
 
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -21,7 +21,7 @@ export function HomeLoginForm() {
     setError(null);
     setPending(true);
     try {
-      await login(email, password);
+      await login(username, password);
       router.replace(nextPath);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '로그인 실패');
@@ -33,14 +33,17 @@ export function HomeLoginForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <label className="block space-y-2">
-          <span className="text-xs font-medium text-ink-secondary">이메일</span>
+          <span className="text-xs font-medium text-ink-secondary">아이디</span>
           <input
-            type="email"
+            type="text"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="ui-input"
-            autoComplete="email"
+            autoComplete="username"
           />
       </label>
       <label className="block space-y-2">

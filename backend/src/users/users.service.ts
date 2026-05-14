@@ -12,13 +12,17 @@ import { Role } from '@prisma/client';
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private normUsername(raw: string) {
+    return raw.trim().toLowerCase();
+  }
+
   async list() {
     const rows = await this.prisma.user.findMany({
       where: { deleted_at: null },
       orderBy: { created_at: 'desc' },
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         role: true,
         is_active: true,
@@ -30,21 +34,22 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto) {
+    const username = this.normUsername(dto.username);
     const exists = await this.prisma.user.findFirst({
-      where: { email: dto.email.toLowerCase().trim(), deleted_at: null },
+      where: { username, deleted_at: null },
     });
-    if (exists) throw new ConflictException('이미 등록된 이메일입니다.');
+    if (exists) throw new ConflictException('이미 사용 중인 아이디입니다.');
     const hash = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
       data: {
-        email: dto.email.toLowerCase().trim(),
+        username,
         password_hash: hash,
         name: dto.name.trim(),
         role: dto.role,
       },
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         role: true,
         is_active: true,
@@ -60,7 +65,7 @@ export class UsersService {
       where: { id, deleted_at: null },
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         role: true,
         is_active: true,
@@ -74,18 +79,19 @@ export class UsersService {
 
   async update(id: string, dto: UpdateUserDto) {
     await this.ensureExists(id);
-    if (dto.email) {
+    if (dto.username) {
+      const username = this.normUsername(dto.username);
       const dup = await this.prisma.user.findFirst({
         where: {
-          email: dto.email.toLowerCase().trim(),
+          username,
           deleted_at: null,
           NOT: { id },
         },
       });
-      if (dup) throw new ConflictException('이미 등록된 이메일입니다.');
+      if (dup) throw new ConflictException('이미 사용 중인 아이디입니다.');
     }
     const data: Record<string, unknown> = {};
-    if (dto.email !== undefined) data.email = dto.email.toLowerCase().trim();
+    if (dto.username !== undefined) data.username = this.normUsername(dto.username);
     if (dto.name !== undefined) data.name = dto.name.trim();
     if (dto.role !== undefined) data.role = dto.role;
     if (dto.isActive !== undefined) data.is_active = dto.isActive;
@@ -97,7 +103,7 @@ export class UsersService {
       data,
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         role: true,
         is_active: true,
@@ -115,7 +121,7 @@ export class UsersService {
       data: { is_active: true },
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         role: true,
         is_active: true,
@@ -133,7 +139,7 @@ export class UsersService {
       data: { is_active: false },
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         role: true,
         is_active: true,
@@ -200,7 +206,7 @@ export class UsersService {
 
   private mapUser(user: {
     id: string;
-    email: string;
+    username: string;
     name: string;
     role: Role;
     is_active: boolean;
@@ -209,7 +215,7 @@ export class UsersService {
   }) {
     return {
       id: user.id,
-      email: user.email,
+      username: user.username,
       name: user.name,
       role: user.role,
       isActive: user.is_active,

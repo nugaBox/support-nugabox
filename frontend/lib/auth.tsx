@@ -18,7 +18,7 @@ import {
 
 export type AuthUser = {
   id: string;
-  email: string;
+  username: string;
   name: string;
   role: 'ADMIN' | 'MEMBER';
   isActive: boolean;
@@ -27,7 +27,7 @@ export type AuthUser = {
 type AuthState = {
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 };
@@ -60,11 +60,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void refreshUser();
   }, [refreshUser]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (username: string, password: string) => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:6041'}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, password }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

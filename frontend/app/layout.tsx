@@ -29,8 +29,8 @@ export default function RootLayout({
               <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-elevated/40 to-transparent dark:from-elevated/20" />
               <div className="relative">{children}</div>
             </main>
-            <footer className="border-t border-line py-10 text-center">
-              <p className="text-xs text-ink-tertiary">
+            <footer className="border-t border-line bg-canvas-subtle py-8 text-center">
+              <p className="text-sm text-ink-secondary">
                 © 2026 NUGABOX. All rights reserved.
               </p>
             </footer>

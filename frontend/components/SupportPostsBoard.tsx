@@ -12,7 +12,7 @@ type Row = {
   category: string;
   status: string;
   site: { id: string; name: string };
-  author: { id: string; name: string; email: string; role: string };
+  author: { id: string; name: string; username: string; role: string };
   createdAt: string;
   updatedAt: string;
 };
@@ -31,7 +31,7 @@ export function SupportPostsBoard() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
-  const [users, setUsers] = useState<{ id: string; name: string; email: string }[]>([]);
+  const [users, setUsers] = useState<{ id: string; name: string; username: string }[]>([]);
 
   const load = useCallback(
     async (overridePage?: number) => {
@@ -64,7 +64,7 @@ export function SupportPostsBoard() {
 
   useEffect(() => {
     if (user?.role !== 'ADMIN') return;
-    void apiJson<{ id: string; name: string; email: string }[]>('/users')
+    void apiJson<{ id: string; name: string; username: string }[]>('/users')
       .then(setUsers)
       .catch(() => undefined);
   }, [user?.role]);
@@ -158,7 +158,7 @@ export function SupportPostsBoard() {
               <option value="">전체</option>
               {users.map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.name} ({u.email})
+                  {u.name} ({u.username})
                 </option>
               ))}
             </select>

@@ -1,8 +1,10 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length, MinLength } from 'class-validator';
 
 export class LoginDto {
-  @IsEmail({}, { message: '유효한 이메일을 입력하세요.' })
-  email!: string;
+  @IsString()
+  @IsNotEmpty()
+  @Length(3, 32)
+  username!: string;
 
   @IsString()
   @IsNotEmpty()

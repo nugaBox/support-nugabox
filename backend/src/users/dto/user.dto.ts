@@ -1,17 +1,25 @@
 import {
   IsBoolean,
-  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
+  Length,
+  Matches,
   MinLength,
 } from 'class-validator';
 import { Role } from '@prisma/client';
 
+const USERNAME_RE = /^[a-zA-Z0-9._-]+$/;
+
 export class CreateUserDto {
-  @IsEmail()
-  email!: string;
+  @IsString()
+  @IsNotEmpty()
+  @Length(3, 32)
+  @Matches(USERNAME_RE, {
+    message: '아이디는 영문, 숫자, . _ - 만 사용할 수 있습니다.',
+  })
+  username!: string;
 
   @IsString()
   @MinLength(8)
@@ -27,8 +35,12 @@ export class CreateUserDto {
 
 export class UpdateUserDto {
   @IsOptional()
-  @IsEmail()
-  email?: string;
+  @IsString()
+  @Length(3, 32)
+  @Matches(USERNAME_RE, {
+    message: '아이디는 영문, 숫자, . _ - 만 사용할 수 있습니다.',
+  })
+  username?: string;
 
   @IsOptional()
   @IsString()

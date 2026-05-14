@@ -8,10 +8,10 @@ async function main() {
   const memberHash = await bcrypt.hash('Member12345!', 10);
 
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@nugabox.local' },
+    where: { username: 'admin' },
     update: {},
     create: {
-      email: 'admin@nugabox.local',
+      username: 'admin',
       password_hash: adminHash,
       name: '관리자',
       role: Role.ADMIN,
@@ -20,10 +20,10 @@ async function main() {
   });
 
   const m1 = await prisma.user.upsert({
-    where: { email: 'member1@nugabox.local' },
+    where: { username: 'member1' },
     update: {},
     create: {
-      email: 'member1@nugabox.local',
+      username: 'member1',
       password_hash: memberHash,
       name: '테스트회원1',
       role: Role.MEMBER,
@@ -32,10 +32,10 @@ async function main() {
   });
 
   const m2 = await prisma.user.upsert({
-    where: { email: 'member2@nugabox.local' },
+    where: { username: 'member2' },
     update: {},
     create: {
-      email: 'member2@nugabox.local',
+      username: 'member2',
       password_hash: memberHash,
       name: '테스트회원2',
       role: Role.MEMBER,
@@ -116,7 +116,10 @@ async function main() {
   });
 
   // eslint-disable-next-line no-console
-  console.log('시드 완료:', { admin: admin.email, members: [m1.email, m2.email] });
+  console.log('시드 완료:', {
+    admin: admin.username,
+    members: [m1.username, m2.username],
+  });
 }
 
 main()

@@ -5,7 +5,7 @@ import { apiJson } from '@/lib/api';
 
 type UserRow = {
   id: string;
-  email: string;
+  username: string;
   name: string;
   role: string;
   isActive: boolean;
@@ -13,7 +13,7 @@ type UserRow = {
 
 export default function SettingsUsersPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'ADMIN' | 'MEMBER'>('MEMBER');
@@ -29,14 +29,14 @@ export default function SettingsUsersPage() {
     e.preventDefault();
     await apiJson('/users', {
       method: 'POST',
-      body: JSON.stringify({
-        email,
-        password,
-        name,
-        role,
-      }),
+        body: JSON.stringify({
+          username,
+          password,
+          name,
+          role,
+        }),
     });
-    setEmail('');
+    setUsername('');
     setName('');
     setPassword('');
     load();
@@ -50,7 +50,7 @@ export default function SettingsUsersPage() {
           <table className="w-full text-left text-sm text-ink">
             <thead>
               <tr className="border-b border-line text-ink-secondary">
-                <th className="py-2.5 font-medium">이메일</th>
+                <th className="py-2.5 font-medium">아이디</th>
                 <th className="py-2.5 font-medium">이름</th>
                 <th className="py-2.5 font-medium">역할</th>
                 <th className="py-2.5 font-medium">상태</th>
@@ -60,7 +60,7 @@ export default function SettingsUsersPage() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className="border-b border-line/70 last:border-0">
-                  <td className="py-2.5">{u.email}</td>
+                  <td className="py-2.5 font-mono text-xs">{u.username}</td>
                   <td className="py-2.5">{u.name}</td>
                   <td className="py-2.5 font-mono text-xs text-ink-secondary">{u.role}</td>
                   <td className="py-2.5">{u.isActive ? '활성' : '비활성'}</td>
@@ -88,12 +88,16 @@ export default function SettingsUsersPage() {
         <h2 className="text-lg font-semibold tracking-tight text-ink">회원 추가</h2>
         <form onSubmit={onCreate} className="mt-4 grid gap-3 md:max-w-lg">
           <input
-            type="email"
-            placeholder="이메일"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            placeholder="아이디 (영문·숫자·._-)"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
             className="ui-input"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            autoComplete="off"
           />
           <input
             placeholder="이름"

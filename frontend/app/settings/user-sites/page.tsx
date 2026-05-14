@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { apiJson } from '@/lib/api';
 
-type UserRow = { id: string; email: string; name: string };
+type UserRow = { id: string; username: string; name: string };
 type Site = { id: string; name: string; code: string };
 
 export default function SettingsUserSitesPage() {
@@ -48,7 +48,7 @@ export default function SettingsUserSitesPage() {
           <option value="">선택…</option>
           {users.map((u) => (
             <option key={u.id} value={u.id}>
-              {u.name} ({u.email})
+              {u.name} ({u.username})
             </option>
           ))}
         </select>

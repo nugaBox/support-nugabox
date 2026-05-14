@@ -16,9 +16,13 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async validateUser(email: string, password: string) {
+  private normUsername(raw: string) {
+    return raw.trim().toLowerCase();
+  }
+
+  async validateUser(username: string, password: string) {
     const user = await this.prisma.user.findFirst({
-      where: { email: email.toLowerCase().trim(), deleted_at: null },
+      where: { username: this.normUsername(username), deleted_at: null },
     });
     if (!user) return null;
     if (!user.is_active) {
@@ -30,11 +34,11 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.validateUser(dto.email, dto.password);
+    const user = await this.validateUser(dto.username, dto.password);
     if (!user) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw new UnauthorizedException('아이디 또는 비밀번호가 올바르지 않습니다.');
     }
-    const accessToken = await this.signAccessToken(user.id, user.email, user.role);
+    const accessToken = await this.signAccessToken(user.id, user.username, user.role);
     const refreshPlain = randomBytes(48).toString('hex');
     const refreshHash = createHash('sha256').update(refreshPlain).digest('hex');
     const expiresAt = this.computeRefreshExpiry(
@@ -72,7 +76,7 @@ export class AuthService {
     if (!user.is_active || user.deleted_at) {
       throw new UnauthorizedException('비활성화된 계정입니다.');
     }
-    const accessToken = await this.signAccessToken(user.id, user.email, user.role);
+    const accessToken = await this.signAccessToken(user.id, user.username, user.role);
     return { accessToken, user: this.toPublicUser(user) };
   }
 
@@ -107,8 +111,8 @@ export class AuthService {
     return new Date(Date.now() + ms);
   }
 
-  private async signAccessToken(userId: string, email: string, role: Role) {
-    const payload: JwtPayload = { sub: userId, email, role };
+  private async signAccessToken(userId: string, username: string, role: Role) {
+    const payload: JwtPayload = { sub: userId, username, role };
     return this.jwt.signAsync(payload, {
       secret: this.config.getOrThrow<string>('JWT_SECRET'),
       expiresIn: this.config.get<string>('JWT_EXPIRES_IN') ?? '15m',
@@ -117,7 +121,7 @@ export class AuthService {
 
   private toPublicUser(user: {
     id: string;
-    email: string;
+    username: string;
     name: string;
     role: Role;
     is_active: boolean;
@@ -126,7 +130,7 @@ export class AuthService {
   }) {
     return {
       id: user.id,
-      email: user.email,
+      username: user.username,
       name: user.name,
       role: user.role,
       isActive: user.is_active,
