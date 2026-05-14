@@ -144,6 +144,23 @@ export default function SettingsUsersPage() {
                         </button>
                         <button
                           type="button"
+                          className="settings-btn"
+                          onClick={() =>
+                            window.confirm(
+                              `비밀번호를 아이디(${u.username})와 동일하게 초기화합니다. 기존에 로그인된 세션은 모두 끊깁니다. 계속할까요?`,
+                            ) &&
+                            void apiJson(`/users/${u.id}/reset-password`, { method: 'PATCH' }).then(
+                              () => {
+                                alert('비밀번호가 초기화되었습니다.');
+                                loadUsers();
+                              },
+                            )
+                          }
+                        >
+                          비밀번호 초기화
+                        </button>
+                        <button
+                          type="button"
                           className="settings-btn-danger"
                           onClick={() =>
                             window.confirm(

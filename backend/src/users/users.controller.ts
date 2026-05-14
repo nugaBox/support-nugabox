@@ -53,6 +53,11 @@ export class UsersController {
     return this.users.deactivate(id);
   }
 
+  @Patch(':id/reset-password')
+  resetPassword(@Param('id') id: string) {
+    return this.users.resetPasswordToUsername(id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.users.softDelete(id);

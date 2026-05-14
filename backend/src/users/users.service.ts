@@ -151,6 +151,33 @@ export class UsersService {
     return this.mapUser(user);
   }
 
+  /** 비밀번호를 DB에 저장된 아이디(username) 문자열과 동일하게 설정한다. */
+  async resetPasswordToUsername(id: string) {
+    await this.ensureExists(id);
+    const row = await this.prisma.user.findFirst({
+      where: { id, deleted_at: null },
+      select: { username: true },
+    });
+    if (!row) throw new NotFoundException();
+    const plain = row.username;
+    const password_hash = await bcrypt.hash(plain, 10);
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: { password_hash },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        role: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+    await this.prisma.refreshToken.deleteMany({ where: { user_id: id } });
+    return this.mapUser(user);
+  }
+
   async softDelete(id: string) {
     await this.ensureExists(id);
     await this.prisma.user.update({
