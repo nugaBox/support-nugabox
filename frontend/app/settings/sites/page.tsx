@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { apiJson } from '@/lib/api';
+import { Modal } from '@/components/Modal';
 
 type Site = {
   id: string;
@@ -13,6 +14,7 @@ type Site = {
 
 export default function SettingsSitesPage() {
   const [sites, setSites] = useState<Site[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [desc, setDesc] = useState('');
@@ -23,6 +25,13 @@ export default function SettingsSitesPage() {
   useEffect(() => {
     load();
   }, []);
+
+  function closeModal() {
+    setModalOpen(false);
+    setName('');
+    setCode('');
+    setDesc('');
+  }
 
   async function onCreate(e: FormEvent) {
     e.preventDefault();
@@ -35,16 +44,19 @@ export default function SettingsSitesPage() {
         isActive: true,
       }),
     });
-    setName('');
-    setCode('');
-    setDesc('');
+    closeModal();
     load();
   }
 
   return (
     <div className="space-y-8">
       <section className="ui-card p-6">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">사이트 목록</h2>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-semibold tracking-tight text-ink">사이트 목록</h2>
+          <button type="button" onClick={() => setModalOpen(true)} className="settings-btn w-full sm:w-auto">
+            사이트 추가
+          </button>
+        </div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left text-sm text-ink">
             <thead>
@@ -62,28 +74,30 @@ export default function SettingsSitesPage() {
                   <td className="py-2.5 font-mono text-xs text-ink-secondary">{s.code}</td>
                   <td className="py-2.5">{s.isActive ? '예' : '아니오'}</td>
                   <td className="py-2.5">
-                    <button
-                      type="button"
-                      className="ui-btn-ghost px-0 text-xs"
-                      onClick={() =>
-                        void apiJson(`/sites/${s.id}`, {
-                          method: 'PATCH',
-                          body: JSON.stringify({ isActive: !s.isActive }),
-                        }).then(load)
-                      }
-                    >
-                      토글
-                    </button>{' '}
-                    <button
-                      type="button"
-                      className="text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400"
-                      onClick={() =>
-                        window.confirm('삭제(비활성·소프트삭제)할까요?') &&
-                        void apiJson(`/sites/${s.id}`, { method: 'DELETE' }).then(load)
-                      }
-                    >
-                      삭제
-                    </button>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="settings-btn"
+                        onClick={() =>
+                          void apiJson(`/sites/${s.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ isActive: !s.isActive }),
+                          }).then(load)
+                        }
+                      >
+                        토글
+                      </button>
+                      <button
+                        type="button"
+                        className="settings-btn-danger"
+                        onClick={() =>
+                          window.confirm('삭제(비활성·소프트삭제)할까요?') &&
+                          void apiJson(`/sites/${s.id}`, { method: 'DELETE' }).then(load)
+                        }
+                      >
+                        삭제
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -92,9 +106,8 @@ export default function SettingsSitesPage() {
         </div>
       </section>
 
-      <section className="ui-card p-6">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">사이트 추가</h2>
-        <form onSubmit={onCreate} className="mt-4 grid gap-3 md:max-w-lg">
+      <Modal open={modalOpen} title="사이트 추가" onClose={closeModal}>
+        <form onSubmit={onCreate} className="grid gap-3">
           <input
             placeholder="사이트명"
             value={name}
@@ -115,11 +128,16 @@ export default function SettingsSitesPage() {
             onChange={(e) => setDesc(e.target.value)}
             className="ui-input"
           />
-          <button type="submit" className="ui-btn-primary w-fit">
-            추가
-          </button>
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={closeModal} className="ui-btn-ghost px-4 py-2 text-xs">
+              취소
+            </button>
+            <button type="submit" className="ui-btn-primary px-4 py-2 text-xs">
+              추가
+            </button>
+          </div>
         </form>
-      </section>
+      </Modal>
     </div>
   );
 }

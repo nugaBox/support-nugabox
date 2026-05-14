@@ -173,14 +173,14 @@ function Inner() {
           <div className="flex shrink-0 gap-2">
             <Link
               href={`/support-posts/${id}/edit`}
-              className="inline-flex items-center justify-center rounded-lg border border-line bg-elevated px-3 py-2 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-elevated-hover"
+              className="inline-flex items-center justify-center rounded-xl border border-line bg-elevated px-3 py-2 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-elevated-hover"
             >
               수정
             </Link>
             <button
               type="button"
               onClick={() => void removePost()}
-              className="inline-flex items-center justify-center rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-800 transition-colors hover:bg-rose-100 dark:border-rose-800/60 dark:bg-rose-950/35 dark:text-rose-200 dark:hover:bg-rose-950/55"
+              className="inline-flex items-center justify-center rounded-xl border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-800 transition-colors hover:bg-rose-100 dark:border-rose-800/60 dark:bg-rose-950/35 dark:text-rose-200 dark:hover:bg-rose-950/55"
             >
               삭제
             </button>

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { RequireAuth } from '@/components/RequireAuth';
 
 const navPill =
-  'rounded-full px-4 py-2 text-sm font-medium text-ink-secondary transition-colors hover:bg-elevated hover:text-ink';
+  'rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary transition-colors hover:bg-elevated hover:text-ink';
 const navPillActive = 'bg-elevated text-ink shadow-sm';
 
 export default function SettingsLayout({
@@ -34,15 +34,13 @@ export default function SettingsLayout({
             </Link>
             <Link
               href="/settings/users"
-              className={`${navPill} ${pathname.startsWith('/settings/users') ? navPillActive : ''}`}
+              className={`${navPill} ${
+                pathname.startsWith('/settings/users') || pathname.startsWith('/settings/user-sites')
+                  ? navPillActive
+                  : ''
+              }`}
             >
               회원
-            </Link>
-            <Link
-              href="/settings/user-sites"
-              className={`${navPill} ${pathname.startsWith('/settings/user-sites') ? navPillActive : ''}`}
-            >
-              매핑
             </Link>
           </nav>
         </div>

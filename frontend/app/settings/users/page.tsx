@@ -1,7 +1,8 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, Fragment, useEffect, useState } from 'react';
 import { apiJson } from '@/lib/api';
+import { Modal } from '@/components/Modal';
 
 type UserRow = {
   id: string;
@@ -11,41 +12,90 @@ type UserRow = {
   isActive: boolean;
 };
 
+type SiteShort = { id: string; name: string; code: string };
+
 export default function SettingsUsersPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
+  const [sites, setSites] = useState<SiteShort[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selection, setSelection] = useState<Record<string, boolean>>({});
+  const [modalOpen, setModalOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'ADMIN' | 'MEMBER'>('MEMBER');
+  const [savingMap, setSavingMap] = useState(false);
 
-  const load = () =>
+  const loadUsers = () =>
     void apiJson<UserRow[]>('/users').then(setUsers).catch(() => undefined);
 
   useEffect(() => {
-    load();
+    loadUsers();
   }, []);
 
-  async function onCreate(e: FormEvent) {
-    e.preventDefault();
-    await apiJson('/users', {
-      method: 'POST',
-        body: JSON.stringify({
-          username,
-          password,
-          name,
-          role,
-        }),
-    });
+  useEffect(() => {
+    void apiJson<SiteShort[]>('/sites').then(setSites).catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    if (!expandedId || sites.length === 0) return;
+    void apiJson<SiteShort[]>(`/users/${expandedId}/sites`)
+      .then((mapped) => {
+        const next: Record<string, boolean> = {};
+        sites.forEach((s) => {
+          next[s.id] = mapped.some((m) => m.id === s.id);
+        });
+        setSelection(next);
+      })
+      .catch(() => undefined);
+  }, [expandedId, sites]);
+
+  function closeUserModal() {
+    setModalOpen(false);
     setUsername('');
     setName('');
     setPassword('');
-    load();
+    setRole('MEMBER');
+  }
+
+  async function onCreateUser(e: FormEvent) {
+    e.preventDefault();
+    await apiJson('/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        username,
+        password,
+        name,
+        role,
+      }),
+    });
+    closeUserModal();
+    loadUsers();
+  }
+
+  async function saveMapping(userId: string) {
+    const siteIds = sites.filter((s) => selection[s.id]).map((s) => s.id);
+    setSavingMap(true);
+    try {
+      await apiJson(`/users/${userId}/sites`, {
+        method: 'PUT',
+        body: JSON.stringify({ siteIds }),
+      });
+      alert('저장되었습니다.');
+    } finally {
+      setSavingMap(false);
+    }
   }
 
   return (
     <div className="space-y-8">
       <section className="ui-card p-6">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">회원 목록</h2>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-semibold tracking-tight text-ink">회원 목록</h2>
+          <button type="button" onClick={() => setModalOpen(true)} className="settings-btn w-full sm:w-auto">
+            회원 추가
+          </button>
+        </div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left text-sm text-ink">
             <thead>
@@ -59,34 +109,79 @@ export default function SettingsUsersPage() {
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} className="border-b border-line/70 last:border-0">
-                  <td className="py-2.5 font-mono text-xs">{u.username}</td>
-                  <td className="py-2.5">{u.name}</td>
-                  <td className="py-2.5 font-mono text-xs text-ink-secondary">{u.role}</td>
-                  <td className="py-2.5">{u.isActive ? '활성' : '비활성'}</td>
-                  <td className="py-2.5">
-                    <button
-                      type="button"
-                      className="ui-btn-ghost px-0 text-xs"
-                      onClick={() =>
-                        void apiJson(`/users/${u.id}/${u.isActive ? 'deactivate' : 'activate'}`, {
-                          method: 'PATCH',
-                        }).then(load)
-                      }
-                    >
-                      {u.isActive ? '비활성화' : '활성화'}
-                    </button>
-                  </td>
-                </tr>
+                <Fragment key={u.id}>
+                  <tr
+                    className={`cursor-pointer border-b border-line/70 transition-colors last:border-0 hover:bg-canvas-subtle/60 ${
+                      expandedId === u.id ? 'bg-canvas-subtle/40' : ''
+                    }`}
+                    onClick={() => setExpandedId(expandedId === u.id ? null : u.id)}
+                  >
+                    <td className="py-2.5 font-mono text-xs">{u.username}</td>
+                    <td className="py-2.5">{u.name}</td>
+                    <td className="py-2.5 font-mono text-xs text-ink-secondary">{u.role}</td>
+                    <td className="py-2.5">{u.isActive ? '활성' : '비활성'}</td>
+                    <td className="py-2.5" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        className="settings-btn"
+                        onClick={() =>
+                          void apiJson(`/users/${u.id}/${u.isActive ? 'deactivate' : 'activate'}`, {
+                            method: 'PATCH',
+                          }).then(loadUsers)
+                        }
+                      >
+                        {u.isActive ? '비활성화' : '활성화'}
+                      </button>
+                    </td>
+                  </tr>
+                  {expandedId === u.id && (
+                    <tr className="border-b border-line/70 bg-canvas-subtle/50 last:border-0">
+                      <td colSpan={5} className="px-4 py-5">
+                        <p className="text-xs font-medium text-ink-secondary">사이트 매핑</p>
+                        <p className="mt-1 text-xs text-ink-tertiary">
+                          접속 가능한 사이트를 선택한 뒤 저장하세요.
+                        </p>
+                        <div className="mt-4 grid gap-2 sm:max-w-xl">
+                          {sites.map((s) => (
+                            <label
+                              key={s.id}
+                              className="flex cursor-pointer items-center gap-3 rounded-xl border border-line bg-elevated px-3 py-2 text-sm text-ink"
+                            >
+                              <input
+                                type="checkbox"
+                                className="size-4 rounded border-line accent-zinc-900 dark:accent-zinc-100"
+                                checked={!!selection[s.id]}
+                                onChange={(e) =>
+                                  setSelection((prev) => ({ ...prev, [s.id]: e.target.checked }))
+                                }
+                              />
+                              <span>
+                                {s.name}{' '}
+                                <span className="font-mono text-xs text-ink-secondary">({s.code})</span>
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          disabled={savingMap}
+                          className="settings-btn mt-4"
+                          onClick={() => void saveMapping(u.id)}
+                        >
+                          {savingMap ? '저장 중…' : '매핑 저장'}
+                        </button>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>
         </div>
       </section>
 
-      <section className="ui-card p-6">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">회원 추가</h2>
-        <form onSubmit={onCreate} className="mt-4 grid gap-3 md:max-w-lg">
+      <Modal open={modalOpen} title="회원 추가" onClose={closeUserModal}>
+        <form onSubmit={onCreateUser} className="grid gap-3">
           <input
             type="text"
             placeholder="아이디 (영문·숫자·._-)"
@@ -122,11 +217,16 @@ export default function SettingsUsersPage() {
             <option value="MEMBER">MEMBER</option>
             <option value="ADMIN">ADMIN</option>
           </select>
-          <button type="submit" className="ui-btn-primary w-fit">
-            추가
-          </button>
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={closeUserModal} className="ui-btn-ghost px-4 py-2 text-xs">
+              취소
+            </button>
+            <button type="submit" className="ui-btn-primary px-4 py-2 text-xs">
+              추가
+            </button>
+          </div>
         </form>
-      </section>
+      </Modal>
     </div>
   );
 }

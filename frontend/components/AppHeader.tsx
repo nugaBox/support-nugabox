@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { useState } from 'react';
 
 const navBase =
-  'rounded-lg px-2.5 py-1.5 text-sm text-ink-secondary transition-colors hover:bg-accent-soft hover:text-ink';
+  'rounded-xl px-2.5 py-1.5 text-sm text-ink-secondary transition-colors hover:bg-accent-soft hover:text-ink';
 const navActive = 'bg-accent-soft font-medium text-ink';
 
 const devLinkClass = 'ui-btn-primary ml-2 py-2 text-xs';
@@ -29,7 +29,7 @@ export function AppHeader() {
             className="h-8 w-auto max-w-[min(100%,220px)] object-contain object-left md:h-9 md:max-w-[260px]"
             priority
           />
-          <span className="text-xl font-bold tracking-tight text-ink md:text-2xl">고객지원</span>
+          <span className="text-lg font-bold tracking-tight text-ink md:text-xl">고객지원</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -57,8 +57,8 @@ export function AppHeader() {
             </>
           )}
           {!loading && (
-            <span className="ml-4 max-w-[140px] truncate text-xs text-ink-tertiary">
-              {user ? `${user.name} · ${user.role === 'ADMIN' ? '관리자' : '회원'}` : ''}
+            <span className="ml-4 max-w-[160px] truncate text-sm font-medium text-ink-secondary">
+              {user ? `${user.name}님` : ''}
             </span>
           )}
           {user ? (
@@ -96,6 +96,7 @@ export function AppHeader() {
           <div className="flex flex-col gap-1">
             {user && (
               <>
+                <p className="px-2.5 py-1 text-sm font-medium text-ink-secondary">{user.name}님</p>
                 <Link href="/support-posts" className={navBase} onClick={() => setOpen(false)}>
                   문의 목록
                 </Link>

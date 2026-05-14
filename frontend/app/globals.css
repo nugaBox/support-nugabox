@@ -87,6 +87,15 @@
   }
 
   .ui-badge {
-    @apply inline-flex items-center rounded-lg border border-line bg-accent-soft px-2 py-0.5 text-[11px] font-medium text-ink-secondary;
+    @apply inline-flex items-center rounded-xl border border-line bg-accent-soft px-2 py-0.5 text-[11px] font-medium text-ink-secondary;
+  }
+
+  /** 설정·테이블 등 보조 액션 (동일 radius) */
+  .settings-btn {
+    @apply inline-flex items-center justify-center rounded-xl border border-line bg-elevated px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-elevated-hover;
+  }
+
+  .settings-btn-danger {
+    @apply inline-flex items-center justify-center rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-800 transition-colors hover:bg-rose-100 dark:border-rose-800/55 dark:bg-rose-950/35 dark:text-rose-200 dark:hover:bg-rose-950/55;
   }
 }

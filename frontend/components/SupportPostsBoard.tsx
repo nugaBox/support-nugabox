@@ -145,11 +145,15 @@ export function SupportPostsBoard() {
       {counts && data && (
         <p className="text-sm text-ink-secondary">
           전체 <span className="font-semibold text-ink">{data.total}</span>건
-          {STATUS_ORDER.map((key) => (
-            <span key={key} className="ml-3">
-              {STATUS_LABEL[key]} <span className="font-medium text-ink">{counts[key] ?? 0}</span>건
-            </span>
-          ))}
+          {STATUS_ORDER.map((key) => {
+            const n = counts[key] ?? 0;
+            if (n <= 0) return null;
+            return (
+              <span key={key} className="ml-3">
+                {STATUS_LABEL[key]} <span className="font-medium text-ink">{n}</span>건
+              </span>
+            );
+          })}
         </p>
       )}
 
@@ -253,8 +257,8 @@ export function SupportPostsBoard() {
                 onClick={() => goPage(n)}
                 className={
                   n === page
-                    ? 'min-w-[2rem] rounded-lg border border-line bg-accent-soft px-2 py-1.5 text-xs font-semibold text-ink'
-                    : 'min-w-[2rem] rounded-lg px-2 py-1.5 text-xs text-ink-secondary hover:bg-canvas-subtle'
+                    ? 'min-w-[2rem] rounded-xl border border-line bg-accent-soft px-2 py-1.5 text-xs font-semibold text-ink'
+                    : 'min-w-[2rem] rounded-xl px-2 py-1.5 text-xs text-ink-secondary hover:bg-canvas-subtle'
                 }
               >
                 {n}
@@ -271,12 +275,6 @@ export function SupportPostsBoard() {
             다음
           </button>
         </div>
-      )}
-
-      {data && (
-        <p className="text-center text-xs text-ink-tertiary">
-          {PAGE_SIZE}개/페이지 · {data.page}/{totalPages} 페이지
-        </p>
       )}
     </div>
   );
