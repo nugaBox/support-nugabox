@@ -70,7 +70,7 @@ export default function SettingsSitesPage() {
               <tr className="border-b border-line text-ink-secondary">
                 <th className="py-2.5 font-medium">이름</th>
                 <th className="py-2.5 font-medium">코드</th>
-                <th className="py-2.5 font-medium">활성</th>
+                <th className="py-2.5 font-medium">상태</th>
                 <th className="py-2.5 font-medium">작업</th>
               </tr>
             </thead>
@@ -79,30 +79,47 @@ export default function SettingsSitesPage() {
                 <tr key={s.id} className="border-b border-line/70 last:border-0">
                   <td className="py-2.5">{s.name}</td>
                   <td className="py-2.5 font-mono text-xs text-ink-secondary">{s.code}</td>
-                  <td className="py-2.5">{s.isActive ? '예' : '아니오'}</td>
+                  <td className="py-2.5">{s.isActive ? '활성화' : '비활성화'}</td>
                   <td className="py-2.5">
                     <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        className="settings-btn"
-                        onClick={() =>
-                          void apiJson(`/sites/${s.id}`, {
-                            method: 'PATCH',
-                            body: JSON.stringify({ isActive: !s.isActive }),
-                          }).then(load)
-                        }
-                      >
-                        토글
-                      </button>
+                      {s.isActive ? (
+                        <button
+                          type="button"
+                          className="settings-btn"
+                          onClick={() =>
+                            void apiJson(`/sites/${s.id}`, {
+                              method: 'PATCH',
+                              body: JSON.stringify({ isActive: false }),
+                            }).then(load)
+                          }
+                        >
+                          비활성화
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="settings-btn"
+                          onClick={() =>
+                            void apiJson(`/sites/${s.id}`, {
+                              method: 'PATCH',
+                              body: JSON.stringify({ isActive: true }),
+                            }).then(load)
+                          }
+                        >
+                          활성화
+                        </button>
+                      )}
                       <button
                         type="button"
                         className="settings-btn-danger"
                         onClick={() =>
-                          window.confirm('삭제(비활성·소프트삭제)할까요?') &&
+                          window.confirm(
+                            '이 사이트를 아카이브할까요? 목록에서는 보이지 않으며 DB에는 그대로 보관됩니다.',
+                          ) &&
                           void apiJson(`/sites/${s.id}`, { method: 'DELETE' }).then(load)
                         }
                       >
-                        삭제
+                        아카이브
                       </button>
                     </div>
                   </td>
