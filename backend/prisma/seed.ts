@@ -1,10 +1,11 @@
 import { PrismaClient, PostCategory, PostStatus, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { passwordForFirstAdmin } from '../src/empty-db-login-material';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminHash = await bcrypt.hash('Admin12345!', 10);
+  const adminHash = await bcrypt.hash(passwordForFirstAdmin(), 10);
   const memberHash = await bcrypt.hash('Member12345!', 10);
 
   const admin = await prisma.user.upsert({
