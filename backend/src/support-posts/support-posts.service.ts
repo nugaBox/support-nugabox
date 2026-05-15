@@ -120,7 +120,7 @@ export class SupportPostsService {
           where: { deleted_at: null },
           orderBy: { created_at: 'asc' },
           include: {
-            user: { select: { id: true, name: true, role: true } },
+            user: { select: { id: true, username: true } },
           },
         },
         history: {
@@ -190,7 +190,7 @@ export class SupportPostsService {
           where: { deleted_at: null },
           orderBy: { created_at: 'asc' },
           include: {
-            user: { select: { id: true, name: true, role: true } },
+            user: { select: { id: true, username: true } },
           },
         },
         history: {
@@ -276,7 +276,7 @@ export class SupportPostsService {
           where: { deleted_at: null },
           orderBy: { created_at: 'asc' },
           include: {
-            user: { select: { id: true, name: true, role: true } },
+            user: { select: { id: true, username: true } },
           },
         },
         history: {
@@ -357,7 +357,7 @@ export class SupportPostsService {
         content: string;
         created_at: Date;
         updated_at: Date;
-        user: { id: string; name: string; role: Role };
+        user: { id: string; username: string };
       }>;
       history: Array<{
         id: string;
@@ -393,7 +393,7 @@ export class SupportPostsService {
         content: c.content,
         createdAt: c.created_at.toISOString(),
         updatedAt: c.updated_at.toISOString(),
-        user: c.user,
+        user: { id: c.user.id, username: c.user.username },
       })),
       statusHistory: post.history.map((h) => ({
         id: h.id,

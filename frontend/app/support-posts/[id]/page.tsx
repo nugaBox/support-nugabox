@@ -31,7 +31,7 @@ type Detail = {
     content: string;
     createdAt: string;
     updatedAt: string;
-    user: { id: string; name: string; role: string };
+    user: { id: string; username: string };
   }>;
   statusHistory: Array<{
     id: string;
@@ -240,38 +240,24 @@ function Inner() {
       <section className="ui-card p-6">
         <h2 className="mb-3 text-sm font-medium text-ink-secondary">본문</h2>
         <SafeHtml html={post.content} />
-      </section>
-
-      <section className="ui-card p-6">
-        <h2 className="mb-3 text-sm font-medium text-ink-secondary">진행내용</h2>
-        {post.progressNote ? (
-          <SafeHtml html={post.progressNote} />
-        ) : (
-          <p className="text-sm text-ink-tertiary">등록된 진행내용이 없습니다.</p>
+        {post.attachments.length > 0 && (
+          <ul className="mt-6 space-y-2 border-t border-line pt-5 text-sm">
+            {post.attachments.map((a) => (
+              <li key={a.id}>
+                <button
+                  type="button"
+                  className="text-ink-secondary underline decoration-line underline-offset-2 hover:text-ink"
+                  onClick={() => void handleDownload(a.id, a.originalName)}
+                >
+                  {a.originalName}
+                </button>
+                <span className="ml-2 text-xs text-ink-tertiary">
+                  {(a.size / 1024).toFixed(1)} KB
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
-      </section>
-
-      <section className="ui-card space-y-3 p-6">
-        <h2 className="text-sm font-medium text-ink">첨부파일</h2>
-        <ul className="space-y-2 text-sm">
-          {post.attachments.map((a) => (
-            <li key={a.id}>
-              <button
-                type="button"
-                className="text-ink-secondary underline decoration-line underline-offset-2 hover:text-ink"
-                onClick={() => void handleDownload(a.id, a.originalName)}
-              >
-                {a.originalName}
-              </button>
-              <span className="ml-2 text-xs text-ink-tertiary">
-                {(a.size / 1024).toFixed(1)} KB
-              </span>
-            </li>
-          ))}
-          {post.attachments.length === 0 && (
-            <li className="text-ink-tertiary">첨부파일이 없습니다.</li>
-          )}
-        </ul>
       </section>
 
       <section>
@@ -285,6 +271,25 @@ function Inner() {
           ))}
           {post.statusHistory.length === 0 && <li>이력 없음</li>}
         </ul>
+
+        <h2 className="mb-3 mt-8 text-sm font-medium text-ink">진행내용</h2>
+        <div className="rounded-xl border border-line bg-canvas-subtle p-4 text-sm">
+          <div className="flex justify-between text-xs text-ink-tertiary">
+            <span>진행내용</span>
+            <span>
+              {post.progressNote
+                ? new Date(post.updatedAt).toLocaleString('ko-KR')
+                : '—'}
+            </span>
+          </div>
+          {post.progressNote ? (
+            <div className="mt-2">
+              <SafeHtml html={post.progressNote} />
+            </div>
+          ) : (
+            <p className="mt-2 text-sm text-ink-tertiary">등록된 진행내용이 없습니다.</p>
+          )}
+        </div>
       </section>
 
       <section className="space-y-4 border-t border-line pt-8">
@@ -293,9 +298,7 @@ function Inner() {
           {post.comments.map((c) => (
             <li key={c.id} className="rounded-xl border border-line bg-canvas-subtle p-4 text-sm">
               <div className="flex justify-between text-xs text-ink-tertiary">
-                <span>
-                  {c.user.name} · {c.user.role === 'ADMIN' ? '관리자' : '회원'}
-                </span>
+                <span>{c.user.username}</span>
                 <span>{new Date(c.createdAt).toLocaleString('ko-KR')}</span>
               </div>
               <p className="mt-2 whitespace-pre-wrap text-ink">{c.content}</p>

@@ -22,14 +22,14 @@ export class CommentsService {
     const rows = await this.prisma.comment.findMany({
       where: { post_id: postId, deleted_at: null },
       orderBy: { created_at: 'asc' },
-      include: { user: { select: { id: true, name: true, role: true } } },
+      include: { user: { select: { id: true, username: true } } },
     });
     return rows.map((c) => ({
       id: c.id,
       content: c.content,
       createdAt: c.created_at.toISOString(),
       updatedAt: c.updated_at.toISOString(),
-      user: c.user,
+      user: { id: c.user.id, username: c.user.username },
     }));
   }
 
@@ -47,14 +47,14 @@ export class CommentsService {
         user_id: current.id,
         content,
       },
-      include: { user: { select: { id: true, name: true, role: true } } },
+      include: { user: { select: { id: true, username: true } } },
     });
     return {
       id: c.id,
       content: c.content,
       createdAt: c.created_at.toISOString(),
       updatedAt: c.updated_at.toISOString(),
-      user: c.user,
+      user: { id: c.user.id, username: c.user.username },
     };
   }
 
@@ -72,14 +72,14 @@ export class CommentsService {
     const u = await this.prisma.comment.update({
       where: { id: commentId },
       data: { content },
-      include: { user: { select: { id: true, name: true, role: true } } },
+      include: { user: { select: { id: true, username: true } } },
     });
     return {
       id: u.id,
       content: u.content,
       createdAt: u.created_at.toISOString(),
       updatedAt: u.updated_at.toISOString(),
-      user: u.user,
+      user: { id: u.user.id, username: u.user.username },
     };
   }
 
