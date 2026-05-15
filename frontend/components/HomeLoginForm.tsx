@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, KeyboardEvent, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 
@@ -30,6 +30,14 @@ export function HomeLoginForm() {
     }
   }
 
+  function submitOnEnter(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== 'Enter' || e.nativeEvent.isComposing || pending) return;
+    const form = e.currentTarget.form;
+    if (!form) return;
+    e.preventDefault();
+    form.requestSubmit();
+  }
+
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <label className="block space-y-2">
@@ -42,6 +50,7 @@ export function HomeLoginForm() {
             spellCheck={false}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            onKeyDown={submitOnEnter}
             className="ui-input"
             autoComplete="username"
           />
@@ -53,6 +62,7 @@ export function HomeLoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={submitOnEnter}
             className="ui-input"
             autoComplete="current-password"
           />
