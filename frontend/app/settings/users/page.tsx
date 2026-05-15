@@ -251,7 +251,7 @@ export default function SettingsUsersPage() {
           />
           <input
             type="password"
-            placeholder="비밀번호 (8자 이상)"
+            placeholder="비밀번호"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

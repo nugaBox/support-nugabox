@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, Length, MinLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class LoginDto {
   @IsString()
@@ -8,7 +8,6 @@ export class LoginDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(8, { message: '비밀번호는 8자 이상이어야 합니다.' })
   password!: string;
 }
 

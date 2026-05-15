@@ -6,7 +6,6 @@ import {
   IsString,
   Length,
   Matches,
-  MinLength,
 } from 'class-validator';
 import { Role } from '@prisma/client';
 
@@ -22,7 +21,7 @@ export class CreateUserDto {
   username!: string;
 
   @IsString()
-  @MinLength(8)
+  @IsNotEmpty()
   password!: string;
 
   @IsString()
@@ -44,7 +43,6 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(8)
   password?: string;
 
   @IsOptional()
