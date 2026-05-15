@@ -8,11 +8,13 @@ import { SupportPostsModule } from './support-posts/support-posts.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { CommentsModule } from './comments/comments.module';
 import { NotificationModule } from './notification/notification.module';
+import { BootstrapAdminModule } from './bootstrap-admin/bootstrap-admin.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    BootstrapAdminModule,
     AuthModule,
     UsersModule,
     SitesModule,
