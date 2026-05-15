@@ -32,10 +32,10 @@ NUGABOX Support — Docker Compose 래퍼
   ./compose.sh --dev seed       # 시드 실행
 
 운영:
-  ./compose.sh --prod up
+  ./compose.sh --prod up        # 백엔드 컨테이너 기동 시 prisma migrate deploy 후 서버 실행
   ./compose.sh --prod down
   ./compose.sh --prod logs [서비스명…]
-  ./compose.sh --prod migrate
+  ./compose.sh --prod migrate   # 수동 재적용(이미 up 시 자동 적용됨)
 EOF
     exit 1
     ;;

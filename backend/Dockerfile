@@ -23,4 +23,5 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY package.json ./
 EXPOSE 4000
-CMD ["node", "dist/main.js"]
+# 운영/CI에서 compose up만 할 때도 스키마가 적용되도록 마이그레이션 후 기동
+CMD ["sh", "-c", "npx prisma migrate deploy && exec node dist/main.js"]
