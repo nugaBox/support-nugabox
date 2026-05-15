@@ -35,3 +35,4 @@ services:
       # 브라우저(호스트) → 호스트에 노출된 프론트 포트의 /api 로 요청 → Next 리라이트 → Nest
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6040/api}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:6040}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:6040}

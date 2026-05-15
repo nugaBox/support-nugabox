@@ -2,43 +2,47 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { AppHeader } from '@/components/AppHeader';
-import { getMetadataBaseUrl } from '@/lib/site-url';
+import { getMetadataBaseUrl, getOgImageAbsoluteUrl, getPublicSiteUrl } from '@/lib/site-url';
 
-const ogImagePath = '/meta_thumbnail.jpg';
+export async function generateMetadata(): Promise<Metadata> {
+  const ogImage = getOgImageAbsoluteUrl();
+  const base = getPublicSiteUrl();
 
-export const metadata: Metadata = {
-  metadataBase: getMetadataBaseUrl(),
-  title: 'NUGABOX 고객지원',
-  description: 'NUGABOX 고객지원 게시판',
-  openGraph: {
-    type: 'website',
-    images: [{ url: ogImagePath, alt: 'NUGABOX 고객지원' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    images: [ogImagePath],
-  },
-  manifest: '/favicon/site.webmanifest',
-  icons: {
-    icon: [
-      { url: '/favicon/favicon.ico', sizes: 'any' },
-      { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: '/favicon/apple-touch-icon.png',
-    other: [
-      {
-        rel: 'mask-icon',
-        url: '/favicon/safari-pinned-tab.svg',
-        color: '#272b35',
-      },
-    ],
-  },
-  other: {
-    'msapplication-TileColor': '#272b35',
-    'msapplication-config': '/favicon/browserconfig.xml',
-  },
-};
+  return {
+    metadataBase: getMetadataBaseUrl(),
+    title: 'NUGABOX 고객지원',
+    description: 'NUGABOX 고객지원 게시판',
+    openGraph: {
+      type: 'website',
+      url: base,
+      images: [{ url: ogImage, alt: 'NUGABOX 고객지원' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: [ogImage],
+    },
+    manifest: '/favicon/site.webmanifest',
+    icons: {
+      icon: [
+        { url: '/favicon/favicon.ico', sizes: 'any' },
+        { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+        { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      ],
+      apple: '/favicon/apple-touch-icon.png',
+      other: [
+        {
+          rel: 'mask-icon',
+          url: '/favicon/safari-pinned-tab.svg',
+          color: '#272b35',
+        },
+      ],
+    },
+    other: {
+      'msapplication-TileColor': '#272b35',
+      'msapplication-config': '/favicon/browserconfig.xml',
+    },
+  };
+}
 
 export default function RootLayout({
   children,

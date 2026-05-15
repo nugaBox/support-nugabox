@@ -21,6 +21,7 @@ services:
         INTERNAL_API_ORIGIN: http://backend:4000
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6040/api}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:6040}
+        APP_BASE_URL: ${APP_BASE_URL:-http://localhost:6040}
     command: npm run start
     ports:
       - "${FRONTEND_PORT:-6040}:3000"
@@ -29,3 +30,4 @@ services:
       INTERNAL_API_ORIGIN: http://backend:4000
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6040/api}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:6040}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:6040}
