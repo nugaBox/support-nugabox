@@ -14,7 +14,7 @@ jobs:
     runs-on: [self-hosted, linux, dsm, nas, support, deploy]
 
     steps:
-      - name: Deploy support on Synology
+      - name: Deploy on Production Server
         id: deploy
         run: |
           set -e
@@ -42,9 +42,7 @@ jobs:
             docker compose -f docker-compose.yml -f docker-compose.prod.yml ps -a
           } > "$DI"
 
-      # appleboy/telegram-action은 내부적으로 docker run을 쓰는데,
-      # DSM self-hosted 러너에서 GitHub용 바인드 마운트 경로가 없어 실패할 수 있음 → curl만 사용
-      - name: Send Telegram Success Notification
+      - name: Send Success Notification
         if: success()
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -95,7 +93,7 @@ jobs:
           print("telegram: ok")
           PY
 
-      - name: Send Telegram Failure Notification
+      - name: Send Failure Notification
         if: failure()
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
