@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { LoginDto, LogoutDto, RefreshDto } from './dto/login.dto';
+import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from '@prisma/client';
 import { ActiveUserGuard } from './guards/active-user.guard';
@@ -30,5 +31,11 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'), ActiveUserGuard)
   me(@CurrentUser() user: User) {
     return this.auth.me(user.id);
+  }
+
+  @Patch('me')
+  @UseGuards(AuthGuard('jwt'), ActiveUserGuard)
+  patchMe(@CurrentUser() user: User, @Body() dto: UpdateMyProfileDto) {
+    return this.auth.updateMyProfile(user.id, dto);
   }
 }

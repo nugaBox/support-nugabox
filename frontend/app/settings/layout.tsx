@@ -21,9 +21,9 @@ export default function SettingsLayout({
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
-              Admin
+              관리자
             </p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">설정</h1>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">관리자 설정</h1>
           </div>
           <nav className="flex flex-wrap gap-1 rounded-2xl border border-line bg-canvas-subtle p-1.5">
             <Link

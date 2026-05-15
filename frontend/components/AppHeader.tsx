@@ -67,12 +67,18 @@ export function AppHeader() {
               >
                 문의
               </Link>
+              <Link
+                href="/account"
+                className={`${navBase} ${pathname.startsWith('/account') ? navActive : ''}`}
+              >
+                설정
+              </Link>
               {user.role === 'ADMIN' && (
                 <Link
                   href="/settings/sites"
                   className={`${navBase} ${pathname.startsWith('/settings') ? navActive : ''}`}
                 >
-                  설정
+                  관리자 설정
                 </Link>
               )}
             </>
@@ -121,9 +127,12 @@ export function AppHeader() {
                 <Link href="/support-posts" className={navBase} onClick={() => setOpen(false)}>
                   문의 목록
                 </Link>
+                <Link href="/account" className={navBase} onClick={() => setOpen(false)}>
+                  설정
+                </Link>
                 {user.role === 'ADMIN' && (
                   <Link href="/settings/sites" className={navBase} onClick={() => setOpen(false)}>
-                    설정
+                    관리자 설정
                   </Link>
                 )}
               </>

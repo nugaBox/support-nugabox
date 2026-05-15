@@ -1,10 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
+import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { Role } from '@prisma/client';
 
@@ -96,6 +101,48 @@ export class AuthService {
     });
     if (!user || !user.is_active) {
       throw new UnauthorizedException();
+    }
+    return this.toPublicUser(user);
+  }
+
+  async updateMyProfile(userId: string, dto: UpdateMyProfileDto) {
+    const name =
+      dto.name !== undefined && dto.name !== null ? String(dto.name).trim() : undefined;
+    const passwordRaw =
+      dto.password !== undefined && dto.password !== null
+        ? String(dto.password).trim()
+        : undefined;
+
+    const hasName = name !== undefined && name.length > 0;
+    const hasPassword = passwordRaw !== undefined && passwordRaw.length > 0;
+
+    if (!hasName && !hasPassword) {
+      throw new BadRequestException(
+        '변경할 회원명 또는 비밀번호를 입력하세요. (비밀번호는 변경할 때만 입력)',
+      );
+    }
+
+    const data: { name?: string; password_hash?: string } = {};
+    if (hasName) data.name = name!;
+    if (hasPassword) {
+      data.password_hash = await bcrypt.hash(passwordRaw!, 10);
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId, deleted_at: null },
+      data,
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        role: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+    if (hasPassword) {
+      await this.prisma.refreshToken.deleteMany({ where: { user_id: userId } });
     }
     return this.toPublicUser(user);
   }
