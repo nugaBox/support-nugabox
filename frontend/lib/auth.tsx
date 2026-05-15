@@ -69,7 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error((err as { message?: string }).message ?? '로그인 실패');
+      const raw = (err as { message?: string | string[] }).message;
+      const msg = Array.isArray(raw) ? raw.join(', ') : raw;
+      throw new Error(typeof msg === 'string' && msg.length > 0 ? msg : '로그인 실패');
     }
     const data = (await res.json()) as {
       accessToken: string;
