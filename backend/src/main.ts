@@ -10,9 +10,11 @@ const cookieParser =
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
-  const origin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:6040';
+  const corsRaw =
+    process.env.CORS_ORIGINS?.trim() || process.env.FRONTEND_ORIGIN?.trim() || 'http://localhost:6040';
+  const origins = corsRaw.split(',').map((s) => s.trim()).filter(Boolean);
   app.enableCors({
-    origin,
+    origin: origins.length === 1 ? origins[0] : origins,
     credentials: true,
   });
   app.use(cookieParser());

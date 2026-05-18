@@ -9,11 +9,13 @@ import { AttachmentsModule } from './attachments/attachments.module';
 import { CommentsModule } from './comments/comments.module';
 import { NotificationModule } from './notification/notification.module';
 import { BootstrapAdminModule } from './bootstrap-admin/bootstrap-admin.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    HealthModule,
     BootstrapAdminModule,
     AuthModule,
     UsersModule,
