@@ -8,7 +8,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-pretendard)', 'Pretendard', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-pretendard)'],
+        mono: ['var(--font-pretendard)'],
       },
       colors: {
         canvas: 'rgb(var(--canvas) / <alpha-value>)',

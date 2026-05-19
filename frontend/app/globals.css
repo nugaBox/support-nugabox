@@ -2,8 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/variable/woff2/PretendardVariable.woff2')
+    format('woff2-variations');
+}
+
 /* OpenAI 스타일: 모노톤 + 라이트 그레이 캔버스 */
 :root {
+  --font-pretendard: 'Pretendard', 'Pretendard Variable';
   --canvas: 247 247 248;
   --canvas-subtle: 242 242 243;
   --elevated: 255 255 255;
@@ -38,20 +48,50 @@
 }
 
 @layer base {
+  html {
+    font-family: var(--font-pretendard);
+    letter-spacing: -0.011em;
+  }
+
   body {
     @apply antialiased text-ink bg-canvas;
-    font-family: var(--font-pretendard), 'Pretendard', system-ui, -apple-system, sans-serif;
-    letter-spacing: -0.011em;
+    font-family: inherit;
+  }
+
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: inherit;
   }
 }
 
 /* 레거시 호환 제거 — 컴포넌트는 canvas/elevated 토큰 사용 */
 .prose-support {
   @apply max-w-none text-sm leading-relaxed text-ink;
+  font-family: inherit;
+}
+
+.prose-support :where(p, li, h1, h2, h3, h4, h5, h6, blockquote, pre, code, a, span, div, td, th) {
+  font-family: inherit;
 }
 
 .prose-support a {
   @apply text-ink-secondary underline underline-offset-2 hover:text-ink;
+}
+
+/* TipTap 에디터·본문: 브라우저 기본 monospace/명조 폴백 방지 */
+.ProseMirror,
+.ProseMirror :where(p, li, pre, code, span) {
+  font-family: inherit;
 }
 
 @layer components {
