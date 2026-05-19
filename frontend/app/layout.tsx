@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { AppHeader } from '@/components/AppHeader';
+import { TokenLoginHandler } from '@/components/TokenLoginHandler';
 import { getMetadataBaseUrl, getOgImageAbsoluteUrl, getPublicSiteUrl } from '@/lib/site-url';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -63,7 +65,12 @@ export default function RootLayout({
             <AppHeader />
             <main className="relative mx-auto w-full max-w-5xl flex-1 px-4 py-12 md:px-8 md:py-14">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-elevated/40 to-transparent dark:from-elevated/20" />
-              <div className="relative">{children}</div>
+              <div className="relative">
+                <Suspense fallback={null}>
+                  <TokenLoginHandler />
+                </Suspense>
+                {children}
+              </div>
             </main>
             <footer className="border-t border-line bg-canvas-subtle py-8 text-center">
               <p className="text-sm text-ink-secondary">

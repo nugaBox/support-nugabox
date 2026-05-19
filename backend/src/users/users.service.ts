@@ -1,16 +1,22 @@
 import * as bcrypt from 'bcrypt';
+import { createHash, randomBytes } from 'crypto';
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto, PutUserSitesDto, UpdateUserDto } from './dto/user.dto';
 import { Role } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {}
 
   private normUsername(raw: string) {
     return raw.trim().toLowerCase();
@@ -148,6 +154,7 @@ export class UsersService {
       },
     });
     await this.prisma.refreshToken.deleteMany({ where: { user_id: id } });
+    await this.prisma.loginToken.deleteMany({ where: { user_id: id } });
     return this.mapUser(user);
   }
 
@@ -175,7 +182,62 @@ export class UsersService {
       },
     });
     await this.prisma.refreshToken.deleteMany({ where: { user_id: id } });
+    await this.prisma.loginToken.deleteMany({ where: { user_id: id } });
     return this.mapUser(user);
+  }
+
+  async getLoginTokenStatus(userId: string) {
+    await this.ensureExists(userId);
+    const row = await this.prisma.loginToken.findUnique({ where: { user_id: userId } });
+    if (!row) {
+      return { hasToken: false as const };
+    }
+    return {
+      hasToken: true as const,
+      createdAt: row.created_at.toISOString(),
+      expiresAt: row.expires_at?.toISOString() ?? null,
+      lastUsedAt: row.last_used_at?.toISOString() ?? null,
+    };
+  }
+
+  async issueLoginToken(userId: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId, deleted_at: null },
+    });
+    if (!user) throw new NotFoundException();
+    if (!user.is_active) {
+      throw new BadRequestException('비활성화된 회원에게는 로그인 토큰을 발급할 수 없습니다.');
+    }
+
+    const plain = randomBytes(48).toString('hex');
+    const tokenHash = createHash('sha256').update(plain).digest('hex');
+    const expiresAt = this.computeLoginTokenExpiry();
+
+    await this.prisma.$transaction([
+      this.prisma.loginToken.deleteMany({ where: { user_id: userId } }),
+      this.prisma.loginToken.create({
+        data: {
+          user_id: userId,
+          token_hash: tokenHash,
+          expires_at: expiresAt,
+        },
+      }),
+    ]);
+
+    const base = this.config.get<string>('APP_BASE_URL')?.replace(/\/$/, '') ?? '';
+    const loginUrl = `${base}/?token=${encodeURIComponent(plain)}`;
+
+    return {
+      token: plain,
+      loginUrl,
+      expiresAt: expiresAt?.toISOString() ?? null,
+    };
+  }
+
+  async revokeLoginToken(userId: string) {
+    await this.ensureExists(userId);
+    await this.prisma.loginToken.deleteMany({ where: { user_id: userId } });
+    return { ok: true };
   }
 
   async softDelete(id: string) {
@@ -185,6 +247,7 @@ export class UsersService {
       data: { deleted_at: new Date(), is_active: false },
     });
     await this.prisma.refreshToken.deleteMany({ where: { user_id: id } });
+    await this.prisma.loginToken.deleteMany({ where: { user_id: id } });
     return { ok: true };
   }
 
@@ -229,6 +292,20 @@ export class UsersService {
   private async ensureExists(id: string) {
     const u = await this.prisma.user.findFirst({ where: { id, deleted_at: null } });
     if (!u) throw new NotFoundException();
+  }
+
+  /** LOGIN_TOKEN_EXPIRES_IN 미설정·빈값이면 만료 없음. 예: 365d, 12h */
+  private computeLoginTokenExpiry(): Date | null {
+    const raw = this.config.get<string>('LOGIN_TOKEN_EXPIRES_IN')?.trim();
+    if (!raw) return null;
+    const s = raw;
+    const num = Number.parseInt(/\d+/.exec(s)?.[0] ?? '0', 10);
+    if (!Number.isFinite(num) || num <= 0) return null;
+    let ms = num * 24 * 60 * 60 * 1000;
+    if (s.endsWith('h')) ms = num * 60 * 60 * 1000;
+    else if (s.endsWith('m')) ms = num * 60 * 1000;
+    else if (s.endsWith('s')) ms = num * 1000;
+    return new Date(Date.now() + ms);
   }
 
   private mapUser(user: {

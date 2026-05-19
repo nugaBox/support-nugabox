@@ -2,6 +2,7 @@ import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { LoginDto, LogoutDto, RefreshDto } from './dto/login.dto';
+import { ExchangeLoginTokenDto } from './dto/login-token.dto';
 import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from '@prisma/client';
@@ -14,6 +15,11 @@ export class AuthController {
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.auth.login(dto);
+  }
+
+  @Post('login-token')
+  loginWithToken(@Body() dto: ExchangeLoginTokenDto) {
+    return this.auth.loginWithToken(dto.token);
   }
 
   @Post('refresh')

@@ -29,6 +29,7 @@ type AuthState = {
   user: AuthUser | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
+  loginWithToken: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 };
@@ -61,6 +62,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void refreshUser();
   }, [refreshUser]);
 
+  const applySession = useCallback((data: { accessToken: string; refreshToken: string; user: AuthUser }) => {
+    setStoredTokens(data.accessToken, data.refreshToken);
+    setUser(data.user);
+  }, []);
+
   const login = useCallback(async (username: string, password: string) => {
     const res = await fetch(`${getApiBase()}/auth/login`, {
       method: 'POST',
@@ -78,9 +84,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       refreshToken: string;
       user: AuthUser;
     };
-    setStoredTokens(data.accessToken, data.refreshToken);
-    setUser(data.user);
-  }, []);
+    applySession(data);
+  }, [applySession]);
+
+  const loginWithToken = useCallback(async (token: string) => {
+    const res = await fetch(`${getApiBase()}/auth/login-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const raw = (err as { message?: string | string[] }).message;
+      const msg = Array.isArray(raw) ? raw.join(', ') : raw;
+      throw new Error(typeof msg === 'string' && msg.length > 0 ? msg : '로그인 토큰이 유효하지 않습니다.');
+    }
+    const data = (await res.json()) as {
+      accessToken: string;
+      refreshToken: string;
+      user: AuthUser;
+    };
+    applySession(data);
+  }, [applySession]);
 
   const logout = useCallback(async () => {
     try {
@@ -102,10 +127,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       loading,
       login,
+      loginWithToken,
       logout,
       refreshUser,
     }),
-    [user, loading, login, logout, refreshUser],
+    [user, loading, login, loginWithToken, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -42,7 +42,22 @@ model User {
   posts              SupportPost[]
   comments           Comment[]
   refresh_tokens     RefreshToken[]
+  login_token        LoginToken?
   status_histories   StatusHistory[]
+}
+
+/// 관리자가 발급하는 URL 로그인용 장기 토큰 (해시만 저장)
+model LoginToken {
+  id           String    @id @default(uuid())
+  user_id      String    @unique
+  token_hash   String    @unique
+  expires_at   DateTime?
+  created_at   DateTime  @default(now())
+  last_used_at DateTime?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
 }
 
 model Site {

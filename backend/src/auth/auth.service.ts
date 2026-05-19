@@ -43,6 +43,46 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('아이디 또는 비밀번호가 올바르지 않습니다.');
     }
+    return this.issueSessionForUser(user);
+  }
+
+  /** 관리자가 발급한 URL 로그인 토큰으로 JWT 세션 발급 */
+  async loginWithToken(plainToken: string) {
+    const trimmed = plainToken?.trim();
+    if (!trimmed) {
+      throw new UnauthorizedException('로그인 토큰이 필요합니다.');
+    }
+    const hash = createHash('sha256').update(trimmed).digest('hex');
+    const row = await this.prisma.loginToken.findUnique({
+      where: { token_hash: hash },
+      include: { user: true },
+    });
+    if (!row) {
+      throw new UnauthorizedException('유효하지 않은 로그인 토큰입니다.');
+    }
+    if (row.expires_at && row.expires_at < new Date()) {
+      throw new UnauthorizedException('만료된 로그인 토큰입니다.');
+    }
+    const user = row.user;
+    if (!user.is_active || user.deleted_at) {
+      throw new UnauthorizedException('비활성화된 계정입니다.');
+    }
+    await this.prisma.loginToken.update({
+      where: { id: row.id },
+      data: { last_used_at: new Date() },
+    });
+    return this.issueSessionForUser(user);
+  }
+
+  private async issueSessionForUser(user: {
+    id: string;
+    username: string;
+    role: Role;
+    name: string;
+    is_active: boolean;
+    created_at: Date;
+    updated_at: Date;
+  }) {
     const accessToken = await this.signAccessToken(user.id, user.username, user.role);
     const refreshPlain = randomBytes(48).toString('hex');
     const refreshHash = createHash('sha256').update(refreshPlain).digest('hex');
@@ -56,10 +96,9 @@ export class AuthService {
         expires_at: expiresAt,
       },
     });
-    const refreshToken = refreshPlain;
     return {
       accessToken,
-      refreshToken,
+      refreshToken: refreshPlain,
       expiresIn: this.config.get('JWT_EXPIRES_IN') ?? '15m',
       user: this.toPublicUser(user),
     };

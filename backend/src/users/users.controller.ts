@@ -72,4 +72,19 @@ export class UsersController {
   putSites(@Param('id') id: string, @Body() dto: PutUserSitesDto) {
     return this.users.putUserSites(id, dto);
   }
+
+  @Get(':id/login-token')
+  loginTokenStatus(@Param('id') id: string) {
+    return this.users.getLoginTokenStatus(id);
+  }
+
+  @Post(':id/login-token')
+  issueLoginToken(@Param('id') id: string) {
+    return this.users.issueLoginToken(id);
+  }
+
+  @Delete(':id/login-token')
+  revokeLoginToken(@Param('id') id: string) {
+    return this.users.revokeLoginToken(id);
+  }
 }
