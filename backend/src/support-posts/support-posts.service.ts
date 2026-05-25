@@ -13,6 +13,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { SitesService } from '../sites/sites.service';
 import { sanitizeRichText } from '../common/sanitize';
+import { normalizeAttachmentFileName } from '../attachments/attachment-filename';
 import {
   CreateSupportPostDto,
   PatchPostStatusDto,
@@ -383,7 +384,7 @@ export class SupportPostsService {
       author: post.author,
       attachments: post.attachments.map((a) => ({
         id: a.id,
-        originalName: a.original_name,
+        originalName: normalizeAttachmentFileName(a.original_name),
         mimeType: a.mime_type,
         size: a.size,
         createdAt: a.created_at.toISOString(),

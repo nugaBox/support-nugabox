@@ -13,6 +13,7 @@ import {
   ALLOWED_MIME_TYPES,
   MAX_ATTACHMENTS_PER_POST,
 } from './attachment.constants';
+import { normalizeAttachmentFileName } from './attachment-filename';
 
 @Injectable()
 export class AttachmentsService {
@@ -43,8 +44,9 @@ export class AttachmentsService {
 
     const created = [];
     for (const file of files) {
-      this.validateFile(file);
-      const ext = path.extname(file.originalname).slice(1).toLowerCase();
+      const originalName = normalizeAttachmentFileName(file.originalname);
+      this.validateFile(file, originalName);
+      const ext = path.extname(originalName).slice(1).toLowerCase();
       const stored = `${uuidv4()}.${ext}`;
       const dest = path.join(dir, stored);
       await fs.promises.writeFile(dest, file.buffer);
@@ -52,7 +54,7 @@ export class AttachmentsService {
       const row = await this.prisma.attachment.create({
         data: {
           post_id: postId,
-          original_name: path.basename(file.originalname),
+          original_name: originalName,
           stored_name: stored,
           mime_type: file.mimetype,
           size: file.size,
@@ -64,7 +66,7 @@ export class AttachmentsService {
 
     return created.map((a) => ({
       id: a.id,
-      originalName: a.original_name,
+      originalName: normalizeAttachmentFileName(a.original_name),
       mimeType: a.mime_type,
       size: a.size,
       createdAt: a.created_at.toISOString(),
@@ -105,7 +107,7 @@ export class AttachmentsService {
     const stream = fs.createReadStream(att.path);
     return {
       stream,
-      fileName: att.original_name,
+      fileName: normalizeAttachmentFileName(att.original_name),
       mimeType: att.mime_type,
       size: att.size,
     };
@@ -118,13 +120,13 @@ export class AttachmentsService {
     }
   }
 
-  private validateFile(file: Express.Multer.File) {
+  private validateFile(file: Express.Multer.File, originalName: string) {
     const maxMb = Number.parseInt(process.env.MAX_FILE_SIZE_MB ?? '10', 10);
     const maxBytes = maxMb * 1024 * 1024;
     if (file.size > maxBytes) {
       throw new BadRequestException(`파일당 최대 ${maxMb}MB까지 업로드 가능합니다.`);
     }
-    const ext = path.extname(file.originalname).slice(1).toLowerCase();
+    const ext = path.extname(originalName).slice(1).toLowerCase();
     if (!ALLOWED_EXTENSIONS.has(ext)) {
       throw new BadRequestException('허용되지 않은 확장자입니다.');
     }

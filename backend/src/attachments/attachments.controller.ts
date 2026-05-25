@@ -16,6 +16,7 @@ import { User } from '@prisma/client';
 import { ActiveUserGuard } from '../auth/guards/active-user.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AttachmentsService } from './attachments.service';
+import { createAttachmentDisposition } from './attachment-filename';
 
 const maxMb = Number.parseInt(process.env.MAX_FILE_SIZE_MB ?? '10', 10);
 
@@ -48,7 +49,7 @@ export class AttachmentsController {
       await this.attachments.getDownloadStream(user, id);
     return new StreamableFile(stream, {
       type: mimeType,
-      disposition: `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+      disposition: createAttachmentDisposition(fileName),
     });
   }
 
