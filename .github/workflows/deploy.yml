@@ -1,4 +1,4 @@
-name: Deploy support-nugabox
+name: Deploy support
 
 on:
   push:
@@ -6,41 +6,93 @@ on:
       - main
 
 concurrency:
-  group: support-nugabox-deploy
+  group: support-deploy
   cancel-in-progress: false
+
+env:
+  DEPLOY_DIR: /volume1/Develop/Sites/support
+  # 폴더명이 support여도 기존 DB·업로드 볼륨(support-nugabox_*) 유지
+  COMPOSE_PROJECT_NAME: support-nugabox
+  DOCKER_BUILDKIT: "1"
+  COMPOSE_DOCKER_CLI_BUILD: "1"
 
 jobs:
   deploy:
-    runs-on: [self-hosted, linux, dsm, nas, support, deploy]
+    runs-on: [self-hosted, linux, x64, nugacloud]
 
     steps:
       - name: Deploy on Production Server
         id: deploy
         run: |
-          set -e
-          DI="/tmp/support-nugabox-deploy-${GITHUB_RUN_ID}.txt"
+          set -euo pipefail
+
+          DI="/tmp/support-deploy-${GITHUB_RUN_ID}.txt"
           echo "DEPLOY_INFO_FILE=$DI" >> "$GITHUB_ENV"
 
-          cd /volume1/Develop/Docker/support-nugabox
+          COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
+          DEPLOY_DIR="${{ env.DEPLOY_DIR }}"
+          LAST_SHA_FILE="${DEPLOY_DIR}/.deploy-last-sha"
+          BUILD_PATHS="backend frontend docker-compose.yml docker-compose.prod.yml compose.sh"
 
-          echo "Sync source from GitHub"
+          step_time() {
+            echo "[timing] $1 — $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          }
+
+          cd "$DEPLOY_DIR"
+
+          step_time "git sync start"
           git fetch origin main
           git reset --hard origin/main
+          CUR="$(git rev-parse HEAD)"
+          step_time "git sync done"
 
-          echo "Build Docker images (same stack as manual: base + prod overlay)"
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml build
+          PREV=""
+          if [ -f "$LAST_SHA_FILE" ]; then
+            PREV="$(cat "$LAST_SHA_FILE")"
+          fi
 
-          echo "Start containers"
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-
-          echo "Show container status"
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml ps -a
+          NEED_BUILD=1
+          if [ -n "$PREV" ] && [ "$PREV" = "$CUR" ]; then
+            echo "Same commit as last deploy ($CUR) — skip image build"
+            NEED_BUILD=0
+          elif [ -n "$PREV" ]; then
+            if git diff --quiet "$PREV" "$CUR" -- $BUILD_PATHS; then
+              echo "No changes under backend/frontend/compose — skip image build"
+              NEED_BUILD=0
+            fi
+          fi
 
           {
-            echo "Timestamp (UTC): $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+            echo "Deploy directory: $DEPLOY_DIR"
+            echo "Compose project: ${COMPOSE_PROJECT_NAME:-<default>}"
+            echo "Commit: $CUR"
+            echo "Previous deploy: ${PREV:-<none>}"
+            echo "Image rebuild: $([ "$NEED_BUILD" -eq 1 ] && echo yes || echo no)"
             echo ""
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml ps -a
           } > "$DI"
+
+          if [ "$NEED_BUILD" -eq 1 ]; then
+            step_time "docker compose build start (parallel)"
+            $COMPOSE build --parallel 2>&1 | tee -a "$DI"
+            step_time "docker compose build done"
+          else
+            echo "Skipped docker compose build" | tee -a "$DI"
+          fi
+
+          step_time "docker compose up start"
+          $COMPOSE up -d 2>&1 | tee -a "$DI"
+          step_time "docker compose up done"
+
+          step_time "container status"
+          $COMPOSE ps -a | tee -a "$DI"
+
+          {
+            echo ""
+            echo "Timestamp (UTC): $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+            echo "Finished commit: $CUR"
+          } >> "$DI"
+
+          echo "$CUR" > "$LAST_SHA_FILE"
 
       - name: Send Success Notification
         if: success()
