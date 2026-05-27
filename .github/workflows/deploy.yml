@@ -62,35 +62,24 @@ jobs:
             fi
           fi
 
-          {
-            echo "Deploy directory: $DEPLOY_DIR"
-            echo "Compose project: ${COMPOSE_PROJECT_NAME:-<default>}"
-            echo "Commit: $CUR"
-            echo "Previous deploy: ${PREV:-<none>}"
-            echo "Image rebuild: $([ "$NEED_BUILD" -eq 1 ] && echo yes || echo no)"
-            echo ""
-          } > "$DI"
-
           if [ "$NEED_BUILD" -eq 1 ]; then
             step_time "docker compose build start (parallel)"
-            $COMPOSE build --parallel 2>&1 | tee -a "$DI"
+            $COMPOSE build --parallel
             step_time "docker compose build done"
           else
-            echo "Skipped docker compose build" | tee -a "$DI"
+            echo "Skipped docker compose build"
           fi
 
           step_time "docker compose up start"
-          $COMPOSE up -d 2>&1 | tee -a "$DI"
+          $COMPOSE up -d
           step_time "docker compose up done"
 
           step_time "container status"
-          $COMPOSE ps -a | tee -a "$DI"
-
           {
-            echo ""
             echo "Timestamp (UTC): $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-            echo "Finished commit: $CUR"
-          } >> "$DI"
+            echo ""
+            $COMPOSE ps -a
+          } > "$DI"
 
           echo "$CUR" > "$LAST_SHA_FILE"
 
